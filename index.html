@@ -20,8 +20,7 @@
     document.body.appendChild(elemUnicodeBoard)
 
     elemTeXArea.addEventListener('input', function () {
-      const state = text.parse(elemTeXArea.value)
-      elemUnicodeBoard.innerText = state ? state[0] : ''
+      elemUnicodeBoard.innerText = UniTeX.parse(elemTeXArea.value)
     })
   </script>
 </body>
