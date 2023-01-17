@@ -30,6 +30,7 @@
     const elemTeXArea = document.createElement('textarea')
     elemTeXArea.cols = '20'
     elemTeXArea.rows = '5'
+    elemTeXArea.style.outline = 'none'
     elemTeXArea.style.border = '2px solid'
     elemTeXArea.style.borderRadius = '4px'
     elemTeXArea.style.fontSize = '1.25em'
@@ -38,11 +39,11 @@
 
     const elemUnicodeBoard = document.createElement('pre')
     elemUnicodeBoard.style.fontSize = '1.25em'
-    elemUnicodeBoard.style.fontFamily = [
-      'TexGyrePagella',
-      'LatinModern-Math',
-      'serif', 'sans-serif' // hold
-    ].join(', ')
+    elemUnicodeBoard.style.fontFamily = [] + [
+      'TexGyrePagella', 
+      'LatinModern-Math', 
+      'serif, sans-serif' // hold
+    ]
     document.body.appendChild(elemUnicodeBoard)
 
     elemTeXArea.addEventListener('input', function () {
