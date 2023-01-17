@@ -12,6 +12,10 @@
       src: url("assets/LatinModern-Math.otf");
     }
     @font-face {
+      font-family: "TexGyrePagella";
+      src: url("assets/TexGyrePagella.otf");
+    }
+    @font-face {
       font-family: "UbuntuMono";
       src: url("assets/UbuntuMono.ttf");
     }
@@ -22,13 +26,15 @@
     const elemTeXArea = document.createElement('textarea')
     elemTeXArea.cols = '20'
     elemTeXArea.rows = '5'
+    elemTeXArea.style.border = '2px solid'
+    elemTeXArea.style.borderRadius = '4px'
     elemTeXArea.style.fontSize = '1.25em'
     elemTeXArea.style.fontFamily = 'UbuntuMono'
     document.body.appendChild(elemTeXArea)
 
     const elemUnicodeBoard = document.createElement('pre')
     elemUnicodeBoard.style.fontSize = '1.25em'
-    elemUnicodeBoard.style.fontFamily = 'LatinModern-Math'
+    elemUnicodeBoard.style.fontFamily = 'TexGyrePagella, LatinModern-Math, serif'
     document.body.appendChild(elemUnicodeBoard)
 
     elemTeXArea.addEventListener('input', function () {
