@@ -77,7 +77,7 @@
   Unicode.greeks = Unicode.greekUppers + Unicode.greekLowers
   
   
-  // typeface
+  // typeface (Mathematical Alphanumeric Symbols)
   const series = Unicode.series
   const alphabets = Unicode.alphabets
   
@@ -90,16 +90,19 @@
     'ℤ', ...series('𝕒', '𝕫'))
   )
   typeface('mathfrak', alphabets(...series('𝕬', '𝖟')))
-  typeface('mathscr', alphabets('𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ', ...series('𝒩', '𝒬'),
+  typeface('mathscr', alphabets(...'𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ', ...series('𝒩', '𝒬'),
     'ℛ', ...series('𝒮', '𝒹'), 'ℯ', '𝒻', 'g', ...series('𝒽', '𝓃'),
     'ℴ', ...series('𝓅', '𝓏'))
   )
   typeface('mathbf', alphabets(...series('𝐀', '𝐳')))
+  typeface('mathit', alphabets(...series('𝐴', '𝑔'), 'h', ...series('𝑖', '𝑧')))
+  typeface('mathsf', alphabets(...series('𝖠', '𝗓')))
   
-  typeface('textit', alphabets(...series('𝐴', '𝑔'), 'h', ...series('𝑖', '𝑧')))
-  typeface('textsf', alphabets(...series('𝖠', '𝗓')))
-  typeface('texttt', alphabets(...series('𝙰', '𝚣')))
   typeface('textbf', Unicode.typeface.mathbf)
+  typeface('textit', Unicode.typeface.mathit)
+  typeface('textsf', Unicode.typeface.mathsf)
+  typeface('texttt', alphabets(...series('𝙰', '𝚣')))
+  
   
   
   // supscript & subscript
@@ -453,15 +456,15 @@
   
   const Environment = {
     // matrix family
-    matrix: xs => matred(xs, ' ', ' ', '; '),
-    smallmatrix: xs => matred(xs, ' ', ' ', '; '),
+    matrix: xs => sepMatrix(xs, ' ', ' ', '; '),
+    smallmatrix: xs => sepMatrix(xs, ' ', ' ', '; '),
   
-    bmatrix: xs => matrix(xs, '[', ']'),
-    pmatrix: xs => matrix(xs, '(', ')'),
-    vmatrix: xs => matred(xs, '|', '|', '; '),
+    bmatrix: xs => regMatrix(xs, '[', ']'),
+    pmatrix: xs => regMatrix(xs, '(', ')'),
+    vmatrix: xs => sepMatrix(xs, '|', '|', '; '),
   
-    Bmatrix: xs => matrix(xs, '{', '}'),
-    Vmatrix: xs => matred(xs, '||', '||', '; '),
+    Bmatrix: xs => regMatrix(xs, '{', '}'),
+    Vmatrix: xs => sepMatrix(xs, '||', '||', '; '),
   
     // theorem family
     proposition: xs => theoremstyle('proposition', xs),
@@ -482,14 +485,22 @@
     // document: xs => xs, 
   }
   
+  const doubleBackslash = '\\\\'
+  
   const matrim = x => x.replace(/\s/g, '').replace(/&/g, ' ')
-  const matrix = function (xs, ls, rs, lg = ls, rg = rs) {
-    let s = ''.concat(...xs.map(x => ls + matrim(x) + rs))
+  
+  const regMatrix = function (gel, ls, rs, lg = ls, rg = rs) {
+    const xs = gel.split(doubleBackslash)
+    console.log(xs)
+    const s = ''.concat(...xs.map(x => ls + matrim(x) + rs))
     return xs.length > 1 ? lg + s + rg : s
   }
-  const matred = (xs, lg, rg, sep) => lg + xs.map(matrim).join(sep) + rg
   
-  const regexpDoubleLine = /\r\n\r\n|\n\n/
+  const sepMatrix = function (gel, lg, rg, sep) {
+    const xs = gel.split(doubleBackslash)
+    return lg + xs.map(matrim).join(sep) + rg
+  }
+  
   
   
   /**
@@ -507,8 +518,11 @@
     return result
   }
   
+  const regexpDoubleLine = /\r\n\r\n|\n\n/
+  
   const theoremstyle = function (type, content) {
     let title = _fixed_js__WEBPACK_IMPORTED_MODULE_0__["default"][type] + '. '
+    console.log(content)
     return title + content
       .split(regexpDoubleLine)
       .map(polymerizeTeX)
@@ -854,7 +868,8 @@
   const begin = backslash.skip(string('begin')).follow(envira).second()
   const end = backslash.skip(string('end')).follow(envira).second()
   // [[begin, text], end]
-  const environ = begin.follow(() => section).follow(end)
+  const environ = begin.follow(() => section)
+    .follow(end)
     .check(xs => xs[0][0] == xs[1])
     .map(xs => _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_5__["default"][xs[1]](xs[0][1]))
   //
@@ -888,7 +903,7 @@
   //
   
   const doubleBackslash = string('\\\\')
-  const section = element.skip(doubleBackslash).or(element).some()
+  const section = doubleBackslash.or(element).plus()
   
   // console.log(environ.parse(String.raw`\begin{bmatrix} 
   //   0 & 1 \\ 
