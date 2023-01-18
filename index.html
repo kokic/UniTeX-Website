@@ -22,26 +22,63 @@
       font-family: "UbuntuMono";
       src: url("assets/UbuntuMono.ttf");
     }
+
+    .copy:active {
+      color: grey;
+    }
   </style>
 </head>
 
 <body>
   <script>
-    const elemTeXArea = document.createElement('textarea')
-    elemTeXArea.cols = '20'
-    elemTeXArea.rows = '5'
+
+    const createElement = name => document.createElement(name)
+
+
+    const width = document.body.clientWidth
+    const columnsMin = 15
+
+    const leftside = createElement('div')
+    leftside.style.display = 'inline-block'
+    document.body.appendChild(leftside)
+
+    const elemTeXArea = createElement('textarea')
+    const columns = Math.max(columnsMin, width / 14 - 220 / 7)
+    elemTeXArea.cols = [] + columns
+    elemTeXArea.rows = [] + columns / 4
     elemTeXArea.style.outline = 'none'
     elemTeXArea.style.border = '2px solid'
     elemTeXArea.style.borderRadius = '4px'
     elemTeXArea.style.fontSize = '1.25em'
     elemTeXArea.style.fontFamily = 'UbuntuMono'
-    document.body.appendChild(elemTeXArea)
+    leftside.appendChild(elemTeXArea)
 
-    const elemUnicodeBoard = document.createElement('pre')
+    leftside.appendChild(createElement('br'))
+
+    const copyUnicode = createElement('div')
+    copyUnicode.innerText = 'copy'
+    copyUnicode.style.fontSize = '1.15em'
+    copyUnicode.style.textAlign = 'right'
+    // copyUnicode.userSelect = 'none'
+    copyUnicode.className = 'copy'
+
+    const input = createElement('input')
+    // input.style.display = 'none'
+
+    copyUnicode.addEventListener('click', function () {
+      input.value = elemUnicodeBoard.innerText
+      leftside.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      leftside.removeChild(input)
+    })
+    leftside.appendChild(copyUnicode)
+
+    const elemUnicodeBoard = createElement('pre')
     elemUnicodeBoard.style.fontSize = '1.25em'
     elemUnicodeBoard.style.fontFamily = [] + [
-      'TexGyrePagella', 
-      'LatinModern-Math', 
+      'TexGyrePagella',
+      'LatinModern-Math',
       'serif, sans-serif' // hold
     ]
     document.body.appendChild(elemUnicodeBoard)
