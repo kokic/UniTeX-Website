@@ -11,20 +11,23 @@
     @font-face {
       font-family: "LatinModern-Math";
       src: url("assets/LatinModern-Math.otf");
+      font-display: auto;
     }
 
     @font-face {
       font-family: "TexGyrePagella";
       src: url("assets/TexGyrePagella.otf");
+      font-display: auto;
     }
 
     @font-face {
       font-family: "UbuntuMono";
       src: url("assets/UbuntuMono.ttf");
+      font-display: auto;
     }
 
     .copy:active {
-      color: grey;
+      color: #c8c8c8;
     }
   </style>
 </head>
@@ -33,8 +36,7 @@
   <script>
 
     const createElement = name => document.createElement(name)
-
-
+    
     const width = document.body.clientWidth
     const columnsMin = 15
 
@@ -43,7 +45,7 @@
     document.body.appendChild(leftside)
 
     const elemTeXArea = createElement('textarea')
-    const columns = Math.max(columnsMin, width / 14 - 220 / 7)
+    const columns = Math.max(columnsMin, Math.round(width / 14 - 55 / 7))
     elemTeXArea.cols = [] + columns
     elemTeXArea.rows = [] + columns / 4
     elemTeXArea.style.outline = 'none'
