@@ -393,7 +393,15 @@
     conjecture: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Conjecture', 'textbf'),
     axiom: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Axiom', 'textbf'),
     example: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Example', 'textbf'),
-    proof: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('proof', 'textit'),
+    proof: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('proof', 'textit'), 
+  
+    /* combined operatorname */
+    argmax: 'arg max', 
+    argmin: 'arg min', 
+    injlim: 'inj lim', 
+    liminf: 'lim inf', 
+    limsup: 'lim sup', 
+    projlim: 'proj lim', 
   
     cdot: '⋅',
     cdotp: '⋅',
@@ -409,6 +417,42 @@
     Box: '□',
     S: '§',
     sect: '§',
+  
+    /* Big Operators */
+    bigotimes: '⨂', 
+    bigvee: '⋁', 
+    bigoplus: '⨁', 
+    bigwedge: '⋀', 
+    bigodot: '⨀', 
+    bigcup: '⋂', 
+    biguplus: '⨄', 
+    bigcup: '⋃', 
+    bigsqcup: '⨆', 
+  
+    wedge: '∧', 
+    vee: '∨', 
+    sqcap: '⊓', 
+    sqcup: '⊔', 
+    boxdot: '⊡', 
+    boxplus: '⊞', 
+    boxminus: '⊟', 
+    boxtimes: '⊠', 
+  
+    oplus: '⊕', 
+    ominus: '⊖', 
+    otimes: '⊗', 
+    oslash: '⊘', 
+  
+    lhd: '⊲',
+    unlhd: '⊴',
+    rhd: '⊳', 
+    unrhd: '⊵',
+    setminus: '∖',
+    smallsetminus: '∖',
+    curlywedge: '⋏', 
+    doublebarwedge: '⩞', 
+    curlyvee: '⋎',
+    eebar: '⊻',
   
   
     /* Block 79 : Mathematical Operators */
@@ -434,7 +478,7 @@
     prod: '∏',
   
     coprod: '∐',
-    sum: '∑',
+    sum: '∑', 
     minus: '−',
     mp: '∓',
     dotplus: '∔',
@@ -504,14 +548,11 @@
   
     smile: '⌣', 
   
-    sub: '⊂',
-    subset: '⊂',
-    subsete: '⊆', 
-    subseteq: '⊆', 
+    sub: '⊂', subset: '⊂',
+    subsete: '⊆', subseteq: '⊆', 
     subseteqq: '⫅', 
     supset: '⊃',
-    supsete: '⊇', 
-    supseteq: '⊇', 
+    supsete: '⊇', supseteq: '⊇', 
     supseteqq: '⫆', 
   
     to: '→',
@@ -552,20 +593,36 @@
     '\\': '\n',
   }
   
-  const greeks = [
-    'Alpha', 'Beta', 'Gamma', 'Delta',
-    'Epsilon', 'Zeta', 'Eta', 'Theta',
-    'Iota', 'Kappa', 'Lambda', 'Mu',
-    'Nu', 'Xi', 'Omicron', 'Pi',
-    'Rho', 'Sigma', 'Tau', 'Upsilon',
-    'Phi', 'Chi', 'Psi', 'Omega',
+  const operatornames = [
+    'arcsin', 'arccos', 'arctan', 'arctg',
+    'arcctg', 'arg',    'ch',     'cos',
+    'det',    'gcd',    'inf',    'cosec',
+    'cosh',   'cot',    'cotg',   'coth',
+    'csc',    'ctg',    'cth',    'lim',
+    'max',    'deg',    'dim',    'exp',
+    'hom',    'ker',    'lg',     'ln',
+    'log',    'min',    'plim',   'Pr',
+    'sup',    'sec',    'sin',    'sinh',
+    'sh',     'tan',    'tanh',   'tg', 
+    'th'
+  ]
+  operatornames.forEach(x => Fixed[x] = x)
   
-    'alpha', 'beta', 'gamma', 'delta',
-    'epsilon', 'zeta', 'eta', 'theta',
-    'iota', 'kappa', 'lambda', 'mu',
-    'nu', 'xi', 'omicron', 'pi',
-    'rho', 'sigma', 'tau', 'upsilon',
-    'phi', 'chi', 'psi', 'omega'
+  
+  const greeks = [
+    'Alpha',   'Beta',  'Gamma',   'Delta',
+    'Epsilon', 'Zeta',  'Eta',     'Theta',
+    'Iota',    'Kappa', 'Lambda',  'Mu',
+    'Nu',      'Xi',    'Omicron', 'Pi',
+    'Rho',     'Sigma', 'Tau',     'Upsilon',
+    'Phi',     'Chi',   'Psi',     'Omega',
+  
+    'alpha',   'beta',  'gamma',   'delta',
+    'epsilon', 'zeta',  'eta',     'theta',
+    'iota',    'kappa', 'lambda',  'mu',
+    'nu',      'xi',    'omicron', 'pi',
+    'rho',     'sigma', 'tau',     'upsilon',
+    'phi',     'chi',   'psi',     'omega'
   ]
   greeks.forEach((x, i) => Fixed[x] = _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].greeks[i])
   
