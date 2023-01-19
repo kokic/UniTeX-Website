@@ -38,14 +38,14 @@
     const createElement = name => document.createElement(name)
     
     const width = document.body.clientWidth
-    const columnsMin = 15
+    const columnsMin = 20
 
     const leftside = createElement('div')
     leftside.style.display = 'inline-block'
     document.body.appendChild(leftside)
 
     const elemTeXArea = createElement('textarea')
-    const columns = Math.max(columnsMin, Math.round(width / 14 - 55 / 7))
+    const columns = Math.round(width / 25 + 15)
     elemTeXArea.cols = [] + columns
     elemTeXArea.rows = [] + columns / 4
     elemTeXArea.style.outline = 'none'
