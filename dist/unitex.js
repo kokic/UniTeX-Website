@@ -63,8 +63,7 @@
     },
   
     render: (s, name) => Array.from(s)
-      .map(x => Unicode.typeface[name][x] || x)
-      .join(''),
+      .map(x => Unicode.typeface[name][x] || x).join(''),
   }
   
   Unicode.letterUppers = Unicode.series('A', 'Z')
@@ -94,6 +93,7 @@
     'ℛ', ...series('𝒮', '𝒹'), 'ℯ', '𝒻', 'g', ...series('𝒽', '𝓃'),
     'ℴ', ...series('𝓅', '𝓏'))
   )
+  typeface('mathcal', Unicode.typeface.mathscr) // remark
   typeface('mathbf', alphabets(...series('𝐀', '𝐳')))
   typeface('mathit', alphabets(...series('𝐴', '𝑔'), 'h', ...series('𝑖', '𝑧')))
   typeface('mathsf', alphabets(...series('𝖠', '𝗓')))
@@ -103,10 +103,14 @@
   typeface('textsf', Unicode.typeface.mathsf)
   typeface('texttt', alphabets(...series('𝙰', '𝚣')))
   
+  typeface('textscr', Unicode.typeface.mathscr) // original
+  typeface('textcal', Unicode.typeface.mathcal) // original
   
   
   // supscript & subscript
   
+  // Unicode Block
+  /*
   Unicode.supscripts = Unicode.block('ᵃ', 'ᵡ', [
     'a',
     'ɐ',
@@ -131,15 +135,78 @@
     't',
     'u',
   ])
+  */
   
-  Unicode.supscripts.x = 'ˣ' // u02e3
-  Unicode.supscripts.n = 'ⁿ' // u207f
+  // supscripts
   
-  Unicode.supscripts[2] = '²' // 
+  Unicode.supscripts = {}
+  
+  Unicode.supscripts[0] = '⁰'
+  Unicode.supscripts[1] = '¹'
+  Unicode.supscripts[2] = '²'
   Unicode.supscripts[3] = '³' // u00b3
+  Unicode.supscripts[4] = '⁴'
+  Unicode.supscripts[5] = '⁵'
+  Unicode.supscripts[6] = '⁶'
+  Unicode.supscripts[7] = '⁷'
+  Unicode.supscripts[8] = '⁸'
+  Unicode.supscripts[9] = '⁹'
   
+  Unicode.supscripts.a = 'ᵃ'
+  Unicode.supscripts.b = 'ᵇ'
+  Unicode.supscripts.c = 'ᶜ'
+  Unicode.supscripts.d = 'ᵈ'
+  Unicode.supscripts.e = 'ᵉ'
+  Unicode.supscripts.f = 'ᶠ'
+  Unicode.supscripts.g = 'ᵍ'
+  Unicode.supscripts.h = 'ʰ'
+  // Unicode.supscripts.i = '^i'
+  Unicode.supscripts.j = 'ʲ'
+  Unicode.supscripts.k = 'ᵏ'
+  Unicode.supscripts.l = 'ˡ'
+  Unicode.supscripts.m = 'ᵐ'
+  Unicode.supscripts.n = 'ⁿ' // u207f
+  Unicode.supscripts.o = 'ᵒ'
+  Unicode.supscripts.p = 'ᵖ'
+  Unicode.supscripts.r = 'ʳ'
+  Unicode.supscripts.s = 'ˢ'
+  Unicode.supscripts.t = 'ᵗ'
+  Unicode.supscripts.u = 'ᵘ'
+  Unicode.supscripts.v = 'ᵛ'
+  Unicode.supscripts.w = 'ʷ'
+  Unicode.supscripts.x = 'ˣ' // u02e3
+  Unicode.supscripts.y = 'ʸ'
+  Unicode.supscripts.z = 'ᶻ'
+  
+  Unicode.supscripts['+'] = '⁺'
+  Unicode.supscripts['-'] = '⁻'
+  Unicode.supscripts['='] = '⁼'
+  Unicode.supscripts['('] = '⁽'
+  Unicode.supscripts[')'] = '⁾'
+  
+  // Unicode: Phonetic Extensions
+  Unicode.supscripts['α'] = 'ᵅ'
+  Unicode.supscripts.A = 'ᴬ'
+  // Unicode.supscripts. = 'ᴭ'
+  Unicode.supscripts.B = 'ᴮ'
+  // Unicode.supscripts. = 'ᴯ'
+  Unicode.supscripts.D = 'ᴰ'
+  Unicode.supscripts.E = 'ᴱ'
+  // Unicode.supscripts. = 'ᴲ'
+  Unicode.supscripts.G = 'ᴳ'
+  Unicode.supscripts.H = 'ᴴ'
+  Unicode.supscripts.I = 'ᴵ'
+  Unicode.supscripts.J = 'ᴶ'
+  Unicode.supscripts.K = 'ᴷ'
+  Unicode.supscripts.L = 'ᴸ'
+  Unicode.supscripts.M = 'ᴹ'
+  Unicode.supscripts.N = 'ᴺ'
+  // Unicode.supscripts. = 'ᴻ'
+  
+  // subscripts
   
   Unicode.subscripts = {}
+  
   Unicode.subscripts[0] = '₀'
   Unicode.subscripts[1] = '₁'
   Unicode.subscripts[2] = '₂'
@@ -150,7 +217,32 @@
   Unicode.subscripts[7] = '₇'
   Unicode.subscripts[8] = '₈'
   Unicode.subscripts[9] = '₉'
+  
+  Unicode.subscripts.a = 'ₐ'
+  Unicode.subscripts.e = 'ₑ'
+  Unicode.subscripts.h = 'ₕ'
+  Unicode.subscripts.i = 'ᵢ' // u1d62
+  Unicode.subscripts.j = 'ⱼ'
+  Unicode.subscripts.k = 'ₖ'
+  Unicode.subscripts.l = 'ₗ'
+  Unicode.subscripts.m = 'ₘ'
+  Unicode.subscripts.n = 'ₙ'
+  Unicode.subscripts.o = 'ₒ' 
   Unicode.subscripts.p = 'ₚ' // u209a
+  Unicode.subscripts.r = 'ᵣ'
+  Unicode.subscripts.s = 'ₛ'
+  Unicode.subscripts.t = 'ₜ'
+  Unicode.subscripts.u = 'ᵤ'
+  Unicode.subscripts.v = 'ᵥ'
+  Unicode.subscripts.x = 'ₓ'
+  
+  Unicode.subscripts['+'] = '₊'
+  Unicode.subscripts['-'] = '₋'
+  Unicode.subscripts['='] = '₌'
+  Unicode.subscripts['('] = '₍'
+  Unicode.subscripts[')'] = '₎'
+  
+  
   
   // console.log(Unicode.supscripts)
   
@@ -172,7 +264,7 @@
     return f(this, ...xs)
   }
   
-  Object.prototype.map = proxy((x, morph) => morph(x))
+  // Object.prototype.map = proxy((x, morph) => morph(x))
   
   // Link
   
@@ -280,6 +372,7 @@
     CC: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.C,
     A: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.A,
     F: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.F,
+    SS: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.S, 
   
     natnums: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.N,
     reals: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.R,
@@ -363,6 +456,7 @@
     int: '∫',
     iint: '∬',
     iiint: '∭',
+    iiiint: '⨌', 
     oint: '∮',
     oiint: '∯',
     oiiint: '∰',
@@ -375,26 +469,47 @@
   
     sim: '∼',
     backsim: '∽',
-    approx: '≈',
     nsim: '≁',
     simeq: '≃',
     nsimeq: '≄',
     cong: '≅',
     congneq: '≆',
     ncong: '≇',
+    
+    approx: '≈', // u2248
+    nappox: '≉', // original
   
+    precapprox: '≾', 
+    succapprox: '≿', 
   
-    subset: '⊂',
-    supset: '⊃',
-    defeq: '≝',
-  
-  
+    eq: '=', 
+    ne: '≠', 
+    neq: '≠', 
+    stareq: '≛', // original
+    deltaeq: '≜', // original
+    triangleq: '≜', 
+    meq: '≞', // original
+    defeq: '≝', // original
+    qeq: '≟', // original
+    
     le: '≤',
     leq: '≤',
     leqslant: '⩽',
     ge: '≥',
     geq: '≥',
     geqslant: '⩾',
+  
+    smile: '⌣', 
+  
+    sub: '⊂',
+    subset: '⊂',
+    subsete: '⊆', 
+    subseteq: '⊆', 
+    subseteqq: '⫅', 
+    supset: '⊃',
+    supsete: '⊇', 
+    supseteq: '⊇', 
+    supseteqq: '⫆', 
   
     to: '→',
     mapsto: '↦',
@@ -453,6 +568,11 @@
   
   // fixed symbol as supscripts
   _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].supscripts[Fixed.times] = _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].supscripts.x
+  
+  // fixed symbol as subscripts
+  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subscripts[Fixed.in] = Fixed.smallin
+  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subscripts[Fixed.ni] = Fixed.smallni
+  
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Fixed);
   
@@ -825,18 +945,7 @@
   )
   
   const digit = token(x => x.boundedIn('0', '9'))
-  
-  
-  /*
-  const digits = digit.plus()
-  
-  const add = digits.follow(token(x => x == '+')).follow(digits)
-  console.log(add.parse('10+33*2'))
-  
-  
-  
-  */
-  
+  // const digits = digit.plus()
   
   const letter = token(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter)
   const letters = letter.plus()
@@ -877,29 +986,44 @@
   const special = x => x == '\\'
     || x == '{' || x == '}'
     || x == '_' || x == '^'
-    || x == '%'
+    || x == '%' || x == '$'
   
   const envira = braceWrap(letters)
   const begin = backslash.skip(string('begin')).follow(envira).second()
   const end = backslash.skip(string('end')).follow(envira).second()
   // [[begin, text], end]
-  const environ = begin.follow(() => section)
-    .follow(end)
+  const environ = begin.follow(() => section).follow(end)
     .check(xs => xs[0][0] == xs[1])
     .map(xs => _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_5__["default"][xs[1]](xs[0][1]))
   //
   
-  const supscript = character('^').follow(value).second()
-    .map(x => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].supscripts[x] || '^' + _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].brace(x))
-  const subscript = character('_').follow(value).second()
-    .map(x => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].subscripts[x] || '_' + _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].brace(x))
-  const suporsub = supscript.or(subscript)
   
+  const corenderer = function (charset, str, otherwise) {
+    const array = Array.from(str)
+    let through = true
+    for (const element of array)
+      through &&= charset[element]
+    return through
+      ? array.map(x => charset[x]).join('')
+      : otherwise(str)
+  }
+  
+  const supscript = character('^').follow(value).second()
+    .map(x => corenderer(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].supscripts, x, s => '^' + _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].brace(s)))
+  const subscript = character('_').follow(value).second()
+    .map(x => corenderer(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].subscripts, x, s => '_' + _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].brace(s)))
+  const suporsub = supscript.or(subscript)
   
   const comment = character('%')
     .skip(token(x => x != '\n').asterisk())
     .skip(character('\n'))
-    .map(x => '')
+    .map(() => '')
+  
+  // inline
+  const mathstyle = character('$')
+    .follow(() => text).second()
+    .skip(character('$'))
+    .map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, 'mathit'))
   
   /** 
    * because there is a simplified version of 
@@ -910,6 +1034,7 @@
    */
   const element = token(x => !special(x)).plus()
     .or(comment)
+    .or(mathstyle)
     .or(suporsub)
     .or(environ)
     .or(fixedMacro)
