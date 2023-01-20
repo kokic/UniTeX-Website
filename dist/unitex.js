@@ -573,11 +573,9 @@
     defeq: '≝', // original
     qeq: '≟', // original
     
-    le: '≤',
-    leq: '≤',
+    le: '≤', leq: '≤',
     leqslant: '⩽',
-    ge: '≥',
-    geq: '≥',
+    ge: '≥', geq: '≥',
     geqslant: '⩾',
   
     smile: '⌣', 
@@ -590,6 +588,7 @@
     supseteqq: '⫆', 
   
     to: '→',
+    gets: '←',
     mapsto: '↦',
     larr: '←',
     lArr: '⇐',
@@ -598,11 +597,15 @@
     rArr: '⇒',
     Rarr: '⇒',
   
+    leftrightarrow: '↔', 
+  
     longmapsto: '⟼',
     longrightarrow: '⟶',
     longleftarrow: '⟵',
     implies: '⟹',
+    Longrightarrow: '⟹',
     impliedby: '⟸',
+    Longleftarrow: '⟸',
     iff: '⟺',
   
     pm: '±',
