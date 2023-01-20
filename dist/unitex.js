@@ -9,28 +9,9 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
+  /* harmony import */ var _link_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+  /* harmony import */ var _proper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
   
-  const singloid = x => x.charAt() == '-'
-    ? singloid(x.substring(1))
-    : x.length <= 1
-  
-  const Proper = new Object()
-  Proper.wrap = (ls, rs) => x => singloid(x) ? x : ls + x + rs
-  Proper.paren = Proper.wrap('(', ')')
-  Proper.bracket = Proper.wrap('[', ']')
-  Proper.brace = Proper.wrap('{', '}')
-  
-  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Proper);
-  
-  /***/ }),
-  /* 2 */
-  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-  
-  __webpack_require__.r(__webpack_exports__);
-  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-  /* harmony export */ });
-  /* harmony import */ var _link_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
   
   
   
@@ -64,6 +45,19 @@
   
     render: (s, name) => Array.from(s)
       .map(x => Unicode.typeface[name][x] || x).join(''),
+  
+    corender: function (charset, str, otherwise) {
+      const array = Array.from(str)
+      let through = true
+      for (const element of array)
+        through &&= charset[element]
+      return through
+        ? array.map(x => charset[x]).join('')
+        : otherwise(str)
+    }, 
+  
+    suprender: s => Unicode.corender(Unicode.supscripts, s, x => '^' + _proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].brace(x)), 
+    subrender: s => Unicode.corender(Unicode.subscripts, s, x => '_' + _proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].brace(x)), 
   }
   
   Unicode.letterUppers = Unicode.series('A', 'Z')
@@ -227,7 +221,7 @@
   Unicode.subscripts.l = 'ₗ'
   Unicode.subscripts.m = 'ₘ'
   Unicode.subscripts.n = 'ₙ'
-  Unicode.subscripts.o = 'ₒ' 
+  Unicode.subscripts.o = 'ₒ'
   Unicode.subscripts.p = 'ₚ' // u209a
   Unicode.subscripts.r = 'ᵣ'
   Unicode.subscripts.s = 'ₛ'
@@ -251,7 +245,7 @@
   
   
   /***/ }),
-  /* 3 */
+  /* 2 */
   /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
   
   __webpack_require__.r(__webpack_exports__);
@@ -295,6 +289,27 @@
   
   
   /***/ }),
+  /* 3 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+  /* harmony export */ });
+  
+  const singloid = x => x.charAt() == '-'
+    ? singloid(x.substring(1))
+    : x.length <= 1
+  
+  const Proper = new Object()
+  Proper.wrap = (ls, rs) => x => singloid(x) ? x : ls + x + rs
+  Proper.paren = Proper.wrap('(', ')')
+  Proper.bracket = Proper.wrap('[', ']')
+  Proper.brace = Proper.wrap('{', '}')
+  
+  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Proper);
+  
+  /***/ }),
   /* 4 */
   /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
   
@@ -302,12 +317,17 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
+  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+  /* harmony import */ var _unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+  
+  
   
   
   
   const Binary = {
-    frac: (x, y) => `${_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x)}/${_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(y)}`
+    frac: (x, y) => `${_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x)}/${_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(y)}`,
+    
   }
   Binary['cfrac'] = Binary.frac
   Binary['dfrac'] = Binary.frac
@@ -324,8 +344,8 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
+  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
+  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
   
   
   
@@ -335,15 +355,29 @@
     text: x => x,
   
     sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x),
+    cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
+    furt: x => '∜' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
   
     hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : '-hat'),
     tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : '-tilde'),
-    bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'), 
+    bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'),
     overline: x => x,
     breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : '-breve'),
   
     kern: x => x.endsWith('em') ? ' '.repeat(x.substring(0, x.length - 2)) : ' ',
+  
+    __optional__: {
+      sqrt: (n, x) =>
+        n == 2 ? Unary.sqrt(x) :
+          n == 3 ? Unary.cbrt(x) :
+            n == 4 ? Unary.furt(x) :
+              _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].suprender(n) + Unary.sqrt(x), 
+    }
   }
+  Unary.mkern = Unary.kern
+  Unary.mskip = Unary.kern
+  Unary.hskip = Unary.kern
+  Unary.hspace = Unary.kern
   
   const typefaceNames = Object.keys(_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typeface)
   typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
@@ -359,7 +393,7 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
   
   
   
@@ -583,14 +617,42 @@
     ell: 'ℓ',
     wp: '℘',
     weierp: '℘',
+  
+    /* Spacing */
+    ',': ' ',
+    '>': ' ', 
+    ':': ' ',
+    ';': ' '.repeat(2),
+    '!': '', // stub
     quad: ' '.repeat(4),
     qquad: ' '.repeat(6),
-    ',': ' ',
-    ';': ' '.repeat(2),
+    thinspace: ' ', 
+    medspace: ' ', 
+    thickspace: ' '.repeat(2),
+    enspace: ' '.repeat(2), 
+    negthickspace: '', // stub
+    negthinspace: '', // stub
+    negmedspace: '', // stub
   
+  
+    '(': '(', 
+    ')': ')', 
+    '[': '[', 
+    ']': ']', 
     '{': '{', 
     '}': '}', 
+    '_': '_', 
+    '%': '%', 
     '\\': '\n',
+    'newline': '\n', 
+  
+    /* Symbols and Punctuation */
+    surd: '√', 
+    checkmark: '✓', 
+    top: '⊤', 
+    bot: '⊥', 
+    mho: '℧', 
+  
   }
   
   const operatornames = [
@@ -735,7 +797,7 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _utils_link_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
+  /* harmony import */ var _utils_link_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
   
   
   
@@ -969,13 +1031,12 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "UniTeX": () => (/* binding */ UniTeX)
   /* harmony export */ });
-  /* harmony import */ var _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-  /* harmony import */ var _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
-  /* harmony import */ var _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
-  /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5);
-  /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(6);
-  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(7);
-  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(8);
+  /* harmony import */ var _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+  /* harmony import */ var _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+  /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+  /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
+  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(7);
+  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(8);
   
   
   
@@ -986,8 +1047,7 @@
   
   
   
-  
-  const token = predicate => new _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__["default"](
+  const token = predicate => new _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__["default"](
     source => source.length > 0
       ? predicate(source[0])
         ? [source[0], source.substring(1)]
@@ -996,7 +1056,7 @@
   )
   const character = char => token(x => x == char)
   
-  const string = str => new _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__["default"](
+  const string = str => new _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__["default"](
     source => source.length > 0
       ? source.startsWith(str)
         ? [str, source.substring(str.length)]
@@ -1007,7 +1067,7 @@
   const digit = token(x => x.boundedIn('0', '9'))
   // const digits = digit.plus()
   
-  const letter = token(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter)
+  const letter = token(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].isLetter)
   const letters = letter.plus()
   
   
@@ -1017,36 +1077,64 @@
   const rbrace = character('}')
   const braceWrap = x => lbrace.follow(x).skip(rbrace).second()
   
+  const lbracket = character('[')
+  const rbracket = character(']')
+  const bracketWrap = x => lbracket.follow(x).skip(rbracket).second()
+  
   const space = character(' ')
   const spacea = space.asterisk()
   // const spaces = space.plus()
   
-  const loose = x => spacea.follow(x).second()
-  const single = digit.or(letter).or(() => fixedMacro)
-  const value = loose(single.or(braceWrap(() => text)))
-  
-  
-  
-  
-  const macroName = letters.or(lbrace).or(rbrace).or(backslash)
-    .or(token(x => x == ',' || x == '.' || x == '\\'))
-  
-  const macroh = backslash.follow(macroName).second()
-  const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_4__["default"][x]).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_4__["default"][x]) // `\\${x}`
-  // [macro, value]
-  const unaryMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
-    .follow(value)
-    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_3__["default"][xs[0]](xs[1]))
-  // [[macro, value1], value2]
-  const binaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x])
-    .follow(value)
-    .follow(value)
-    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0][0]](xs[0][1], xs[1]))
   
   const special = x => x == '\\'
     || x == '{' || x == '}'
     || x == '_' || x == '^'
     || x == '%' || x == '$'
+  const loose = x => spacea.follow(x).second()
+  // const unit = digit.skip(string('em'))
+  const valuesymbol = token(x => !special(x))
+  const single = digit.or(letter).or(valuesymbol).or(() => fixedMacro)
+  const value = loose(single.or(braceWrap(() => text)))
+  const optional = bracketWrap(value) // [value]
+  
+  const symbolMacros = token(
+    x => x == ','
+      || x == '>'
+      || x == ':'
+      || x == ';'
+      || x == '!'
+      || x == '(' || x == ')'
+      || x == '[' || x == ']'
+      || x == '{' || x == '}'
+      // || x == '.'
+      || x == '_'
+      || x == '%'
+      || x == '\\'
+  )
+  
+  const macroName = letters.or(symbolMacros)
+  
+  const macroh = backslash.follow(macroName).second()
+  const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
+  
+  // [macro, value]
+  const unaryOrdinaryMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x])
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
+  
+  // [[marco, optional], value]
+  const unaryOptionalMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[x])
+    .follow(optional)
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[xs[0][0]](xs[0][1], xs[1]))
+  
+  const unaryMacro = unaryOrdinaryMacro.or(unaryOptionalMacro)
+  
+  // [[macro, value1], value2]
+  const binaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][x])
+    .follow(value)
+    .follow(value)
+    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
   
   const envira = braceWrap(letters)
   const begin = backslash.skip(string('begin')).follow(envira).second()
@@ -1054,24 +1142,14 @@
   // [[begin, text], end]
   const environ = begin.follow(() => section).follow(end)
     .check(xs => xs[0][0] == xs[1])
-    .map(xs => _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_5__["default"][xs[1]](xs[0][1]))
+    .map(xs => _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__["default"][xs[1]](xs[0][1]))
   //
   
   
-  const corenderer = function (charset, str, otherwise) {
-    const array = Array.from(str)
-    let through = true
-    for (const element of array)
-      through &&= charset[element]
-    return through
-      ? array.map(x => charset[x]).join('')
-      : otherwise(str)
-  }
-  
   const supscript = character('^').follow(value).second()
-    .map(x => corenderer(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].supscripts, x, s => '^' + _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].brace(s)))
+    .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].suprender)
   const subscript = character('_').follow(value).second()
-    .map(x => corenderer(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].subscripts, x, s => '_' + _src_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].brace(s)))
+    .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subrender)
   const suporsub = supscript.or(subscript)
   
   const comment = character('%')
@@ -1083,7 +1161,7 @@
   const mathstyle = character('$')
     .follow(() => text).second()
     .skip(character('$'))
-    .map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, 'mathit'))
+    .map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit'))
   
   /** 
    * because there is a simplified version of 
@@ -1093,6 +1171,7 @@
    *
    */
   const element = token(x => !special(x)).plus()
+    .or(value)
     .or(comment)
     .or(mathstyle)
     .or(suporsub)
