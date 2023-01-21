@@ -26,7 +26,31 @@
       font-display: auto;
     }
 
-    .copy:active {
+    body {
+      font-family: UbuntuMono;
+    }
+
+    #leftside {
+      display: inline-block;
+    }
+
+    textarea {
+      outline: none;
+      border: 2px solid;
+      border-radius: 4px;
+      font-size: 1.25em;
+      font-family: monospace;
+    }
+
+    #copy-unicode {
+      font-size: 1.25em;
+      text-align: right;
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #copy-unicode:active {
       color: #c8c8c8;
     }
 
@@ -44,86 +68,56 @@
       background-image: linear-gradient(transparent, transparent 4px, #d480aa 4px, #d480aa);
       background-size: 100% 0.38em;
     }
+
+    .vert-top {
+      margin: 0 5px;
+      vertical-align: top;
+    }
+
+    pre {
+      font-size: 1.25em;
+      font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
+    }
   </style>
+
+</head>
+
+<body>
+  <div id="leftside">
+    <textarea id="tex-area"></textarea>
+    <div id="copy-unicode">copy</div>
+  </div>
+  <pre id="unicode-board"></pre>
+  <a class="vert-top" href="https://github.com/kokic/UniTeX">Github</a>
 
   <script>
 
     const createElement = name => document.createElement(name)
+    
+    const elemTeXArea = document.getElementById('tex-area')
+    const copyUnicode = document.getElementById('copy-unicode')
+    const elemUnicodeBoard = document.getElementById('unicode-board')
 
-    const columnsMin = 20
-
-    const leftside = createElement('div')
-    leftside.style.display = 'inline-block'
-
-    const elemTeXArea = createElement('textarea')
-
-    elemTeXArea.style.outline = 'none'
-    elemTeXArea.style.border = '2px solid'
-    elemTeXArea.style.borderRadius = '4px'
-    elemTeXArea.style.fontSize = '1.25em'
-    elemTeXArea.style.fontFamily = 'UbuntuMono'
-
-
-    const copyUnicode = createElement('div')
-    copyUnicode.innerText = 'copy'
-    copyUnicode.style.fontSize = '1.15em'
-    copyUnicode.style.textAlign = 'right'
-    // copyUnicode.userSelect = 'none'
-    copyUnicode.className = 'copy'
-
-    const input = createElement('input')
-    // input.style.display = 'none'
+    const copiesBridge = createElement('input')
 
     copyUnicode.addEventListener('click', function () {
-      input.value = elemUnicodeBoard.innerText
-      leftside.appendChild(input)
-      input.select()
+      copiesBridge.value = elemUnicodeBoard.innerText
+      leftside.appendChild(copiesBridge)
+      copiesBridge.select()
       document.execCommand('copy')
-      leftside.removeChild(input)
+      leftside.removeChild(copiesBridge)
     })
-
-
-    const toGithub = createElement('a')
-    toGithub.innerText = 'github'
-    toGithub.href = 'https://github.com/kokic/UniTeX'
-    toGithub.style.marginLeft = '5px'
-    toGithub.style.marginRight = '5px'
-    toGithub.style.verticalAlign = 'top'
-
-
-    const elemUnicodeBoard = createElement('pre')
-    elemUnicodeBoard.style.fontSize = '1.25em'
-    elemUnicodeBoard.style.fontFamily = [] + [
-      'TexGyrePagella',
-      'LatinModern-Math',
-      'serif, sans-serif' // hold
-    ]
 
     elemTeXArea.addEventListener('input', function () {
       elemUnicodeBoard.innerText = UniTeX.parse(elemTeXArea.value)
     })
-  </script>
-</head>
-
-<body>
-
-  <script>
 
     const width = document.body.clientWidth
     const columns = Math.round(width / 25 + 15)
     elemTeXArea.cols = [] + columns
     elemTeXArea.rows = [] + columns / 4
 
-    leftside.appendChild(elemTeXArea)
-    leftside.appendChild(createElement('br'))
-    leftside.appendChild(copyUnicode)
-
-    document.body.appendChild(leftside)
-    document.body.appendChild(toGithub)
-    document.body.appendChild(elemUnicodeBoard)
-
   </script>
-
 </body>
 
 </html>
