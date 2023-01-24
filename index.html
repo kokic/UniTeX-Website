@@ -118,7 +118,7 @@
 
     const copiesBridge = createElement('input')
 
-    const search = window.location.search
+    const search = decodeURI(window.location.search)
     search && handleQueries(search.substring(1).split('&'))
 
     copyUnicode.addEventListener('click', function () {
