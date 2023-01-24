@@ -100,6 +100,9 @@
   typeface('textscr', Unicode.typeface.mathscr) // original
   typeface('textcal', Unicode.typeface.mathcal) // original
   
+  // typeface('text', alphabets(...series('A', 'Z'), ...series('a', 'z')))
+  
+  Unicode.typefaceNames = Object.keys(Unicode.typeface)
   
   // supscript & subscript
   
@@ -265,8 +268,8 @@
   const defined = x => x != undefined
   const point = (x, f) => ({ x: x, y: f(x) })
   
-  const Link = function (exec, chain = true) {
-    this.exec = exec
+  const Link = function (run, chain = true) {
+    this.run = run
     this.chain = chain
     this.suspend = () => this.chain = false
     this.transfer = () => defined(this.next)
@@ -275,17 +278,17 @@
   
     this.check = (predicate = defined) => this.next = new Link((...xs) =>
       (x => x.y ? x.x : (this.next.suspend(), undefined))
-        (point(this.exec(...xs), this.transphism(predicate))))
+        (point(this.run(...xs), this.transphism(predicate))))
   
-    this.glue = next => this.next = new Link((...xs) =>
+    this.pip = next => this.next = new Link((...xs) =>
       (x => defined(x.y) ? [x.x, x.y] : (this.next.suspend(), undefined))
-        (point(this.exec(...xs), this.transphism(next.exec))))
+        (point(this.run(...xs), this.transphism(next.run))))
   
     this.map = morph => this.next = new Link((...xs) =>
-      this.transphism(morph)(this.exec(...xs)))
+      this.transphism(morph)(this.run(...xs)))
   }
   
-  const link = exec => new Link(exec).check()
+  const link = run => new Link(run).check()
   
   
   /***/ }),
@@ -352,7 +355,7 @@
   
   const Unary = {
     id: x => x,
-    text: x => x,
+    text: x => x, 
   
     sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x),
     cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
@@ -379,8 +382,10 @@
   Unary.hskip = Unary.kern
   Unary.hspace = Unary.kern
   
-  const typefaceNames = Object.keys(_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typeface)
-  typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
+  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
+  
+  /* just for typeface: Parser */
+  Unary.typefaceNames = ['text', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames]
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Unary);
   
@@ -872,7 +877,22 @@
   
   __webpack_require__.r(__webpack_exports__);
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+  /* harmony export */   "character": () => (/* binding */ character),
+  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+  /* harmony export */   "digit": () => (/* binding */ digit),
+  /* harmony export */   "digits": () => (/* binding */ digits),
+  /* harmony export */   "includes": () => (/* binding */ includes),
+  /* harmony export */   "inclusive": () => (/* binding */ inclusive),
+  /* harmony export */   "letter": () => (/* binding */ letter),
+  /* harmony export */   "letters": () => (/* binding */ letters),
+  /* harmony export */   "loose": () => (/* binding */ loose),
+  /* harmony export */   "soft": () => (/* binding */ soft),
+  /* harmony export */   "space": () => (/* binding */ space),
+  /* harmony export */   "spacea": () => (/* binding */ spacea),
+  /* harmony export */   "spaces": () => (/* binding */ spaces),
+  /* harmony export */   "string": () => (/* binding */ string),
+  /* harmony export */   "token": () => (/* binding */ token),
+  /* harmony export */   "tokens": () => (/* binding */ tokens)
   /* harmony export */ });
   /* harmony import */ var _utils_link_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
   
@@ -883,6 +903,7 @@
   const Parser = function (parse) {
     this.parse = parse
   }
+  Parser.create = parse => new Parser(parse)
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Parser);
   
@@ -932,15 +953,9 @@
     return new Parser(source =>
       (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(() => this.parse(source))
         .map(xs => [morph(xs[0]), xs[1]])
-        .exec()
+        .run()
     )
   }
-  
-  // let tuple = this.parse(source)
-  // if (!tuple) return undefined
-  
-  // let [a, residue] = tuple
-  // return [morph(a), residue]
   
   Parser.prototype.first = (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.proxy)(x => x.map(tuple => tuple[0]))
   Parser.prototype.second = (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.proxy)(x => x.map(tuple => tuple[1]))
@@ -957,30 +972,11 @@
   Parser.prototype.follow = function (next) {
     return new Parser(source =>
       (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(() => this.parse(source))
-        .glue((0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(xs => next.parse(xs[1])))
+        .pip((0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(xs => next.parse(xs[1])))
         .map(xs => [[xs[0][0], xs[1][0]], xs[1][1]])
-        .exec()
+        .run()
     )
   }
-  
-  //  -> [a, phase1, b, phase2]      (flat )
-  // flat version: ((a, _, b, s) => [[a, b], s])(...xs.flat())
-  
-  // let link1 = new Link(() => this.parse(source)).check()
-  // let link2 = new Link(xs => next.parse(xs[1])).check()
-  // let morph = xs => xs && ((a, _, b, s) => [[a, b], s])(...xs.flat())
-  
-  // let tuple1 = this.parse(source)
-  // if (!tuple1) return undefined
-  
-  // let [a, phase1] = tuple1
-  
-  // let tuple2 = next.parse(phase1)
-  // if (!tuple2) return undefined
-  
-  // let [b, phase2] = tuple2
-  // return [[a, b], phase2]
-  
   
   /*
    *  tuple1? -> [a, phase1]                 (check)
@@ -991,23 +987,27 @@
   Parser.prototype.skip = function (next) {
     return new Parser(source =>
       (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(() => this.parse(source))
-        .glue((0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(xs => next.parse(xs[1])))
+        .pip((0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(xs => next.parse(xs[1])))
         .map(xs => [xs[0][0], xs[1][1]])
-        .exec()
+        .run()
     )
   }
   
-  // let tuple1 = this.parse(source)
-  // if (!tuple1) return undefined
   
-  // let [a, phase1] = tuple1
-  // let tuple2 = next.get().parse(phase1)
-  // if (!tuple2) return undefined
-  
-  // let [, phase2] = tuple2
-  // return [a, phase2]
-  
-  
+  /*
+   *  tuple1? -> [a, phase1]                 (check)
+   *          -> [[a, phase1], tuple2?]      (glue )
+   *          -> [[a, phase1], [b, phase2]]  (check)
+   *          -> [b, phase2]
+   */
+  Parser.prototype.move = function (next) {
+    return new Parser(source =>
+      (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(() => this.parse(source))
+        .pip((0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(xs => next.parse(xs[1])))
+        .map(xs => xs[1])
+        .run()
+    )
+  }
   
   
   /*
@@ -1015,19 +1015,12 @@
    *         -> [a, residue] (check predicate)
    */
   Parser.prototype.check = function (predicate) {
-    return new Parser(source => 
+    return new Parser(source =>
       (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(() => this.parse(source))
         .check(x => predicate(...x))
-        .exec()
+        .run()
     )
   }
-  // let tuple1 = this.parse(source)
-  // if (!tuple1) return undefined
-  
-  // let [a, phase1] = tuple1
-  // if (!predicate(a, phase1)) return undefined
-  // return tuple1
-  
   
   /*
    *  tuple1? -> tuple1 (check)
@@ -1039,9 +1032,58 @@
     )
   }
   
-  // let tuple = this.parse(source)
-  // if (tuple) return tuple
-  // return next.get().parse(source)
+  
+  
+  
+  const token = predicate => new Parser(
+    source => source.length > 0
+      ? predicate(source[0])
+        ? [source[0], source.substring(1)]
+        : undefined
+      : undefined
+  )
+  
+  const tokens = (n, predicate) => new Parser(
+    source => source.length >= n ?
+      (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.link)(() => source.substring(0, n))
+        .check(predicate)
+        .map(x => [x, source.substring(n)])
+        .run()
+      : undefined
+  )
+  const inclusive = (n, ...xs) => tokens(n, x => xs.includes(x))
+  
+  const character = char => token(x => x == char)
+  const includes = (...xs) => token(x => xs.includes(x))
+  
+  const string = str => new Parser(
+    source => source.length >= str.length
+      ? source.startsWith(str)
+        ? [str, source.substring(str.length)]
+        : undefined
+      : undefined
+  )
+  
+  const space = character(' ')
+  const spacea = space.asterisk()
+  const spaces = space.plus()
+  
+  const loose = x => spacea.follow(x).second()
+  const soft = x => loose(x).skip(spacea)
+  
+  Number.prototype.boundedIn = (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.proxy)((x, a, b) => a <= x && x <= b)
+  String.prototype.code = (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.proxy)(x => x.codePointAt(0))
+  String.prototype.boundedIn = (0,_utils_link_js__WEBPACK_IMPORTED_MODULE_0__.proxy)((x, a, b) => x.code().boundedIn(a.code(), b.code()))
+  
+  const digit = token(x => x.boundedIn('0', '9'))
+  const digits = digit.plus()
+  
+  const letter = token(x => x.boundedIn('a', 'z') || x.boundedIn('A', 'Z'))
+  const letters = letter.plus()
+  
+  
+  
+  
   
   
   /***/ })
@@ -1124,74 +1166,29 @@
   
   
   
-  const token = predicate => new _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__["default"](
-    source => source.length > 0
-      ? predicate(source[0])
-        ? [source[0], source.substring(1)]
-        : undefined
-      : undefined
-  )
-  const character = char => token(x => x == char)
+  const backslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('\\')
   
-  const string = str => new _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__["default"](
-    source => source.length > 0
-      ? source.startsWith(str)
-        ? [str, source.substring(str.length)]
-        : undefined
-      : undefined
-  )
+  const lbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('{')
+  const rbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('}')
+  const braceWrap = x => lbrace.move(x).skip(rbrace)
   
-  const digit = token(x => x.boundedIn('0', '9'))
-  // const digits = digit.plus()
+  const lbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('[')
+  const rbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)(']')
+  const bracketWrap = x => lbracket.move(x).skip(rbracket)
   
-  const letter = token(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].isLetter)
-  const letters = letter.plus()
-  
-  
-  const backslash = character('\\')
-  
-  const lbrace = character('{')
-  const rbrace = character('}')
-  const braceWrap = x => lbrace.follow(x).skip(rbrace).second()
-  
-  const lbracket = character('[')
-  const rbracket = character(']')
-  const bracketWrap = x => lbracket.follow(x).skip(rbracket).second()
-  
-  const space = character(' ')
-  const spacea = space.asterisk()
-  // const spaces = space.plus()
-  
-  
-  const special = x => x == '\\'
-    || x == '{' || x == '}'
-    || x == '_' || x == '^'
-    || x == '%' || x == '$'
-  const loose = x => spacea.follow(x).second()
+  const special = x => [...'\\{}_^%$'].includes(x)
   // const unit = digit.skip(string('em'))
-  const valuesymbol = token(x => !special(x))
-  const single = digit.or(letter).or(valuesymbol).or(() => fixedMacro)
-  const value = loose(single.or(braceWrap(() => text)))
+  
+  const valuesymbol = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x))
+  const single = _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.digit.or(_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.letter).or(valuesymbol).or(() => fixedMacro)
+  const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.loose)(single.or(braceWrap(() => text)))
   const optional = bracketWrap(value) // [value]
   
-  const symbolMacros = token(
-    x => x == ','
-      || x == '>'
-      || x == ':'
-      || x == ';'
-      || x == '!'
-      || x == '(' || x == ')'
-      || x == '[' || x == ']'
-      || x == '{' || x == '}'
-      // || x == '.'
-      || x == '_'
-      || x == '%'
-      || x == '\\'
-  )
+  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.includes)(...',>:!()[]{}_%\\')
   
-  const macroName = letters.or(symbolMacros)
+  const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.letters.or(symbolMacros)
   
-  const macroh = backslash.follow(macroName).second()
+  const macroh = backslash.move(macroName)
   const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
   
   // [macro, value]
@@ -1213,9 +1210,9 @@
     .follow(value)
     .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
   
-  const envira = braceWrap(letters)
-  const begin = backslash.skip(string('begin')).follow(envira).second()
-  const end = backslash.skip(string('end')).follow(envira).second()
+  const envira = braceWrap(_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.letters)
+  const begin = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('begin')).move(envira)
+  const end = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('end')).move(envira)
   // [[begin, text], end]
   const environ = begin.follow(() => section).follow(end)
     .check(xs => xs[0][0] == xs[1])
@@ -1223,22 +1220,35 @@
   //
   
   
-  const supscript = character('^').follow(value).second()
+  const supscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('^').move(value)
     .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].suprender)
-  const subscript = character('_').follow(value).second()
+  const subscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('_').move(value)
     .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subrender)
   const suporsub = supscript.or(subscript)
   
-  const comment = character('%')
-    .skip(token(x => x != '\n').asterisk())
-    .skip(character('\n'))
+  const comment = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('%')
+    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => x != '\n').asterisk())
+    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('\n'))
     .map(() => '')
+  //
   
+  
+  const mathelem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
+    .or(value)
+    .or(suporsub)
+    .or(environ)
+    .or(fixedMacro)
+    .or(unaryMacro)
+    .or(binaryMacro)
+  
+  const typeface = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.includes(x))
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
+  
+  const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('$')
   // inline
-  const mathstyle = character('$')
-    .follow(() => text).second()
-    .skip(character('$'))
-    .map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit'))
+  const mathrender = typeface.or(() => mathelem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
+  const mathstyle = dollar.move(mathrender.plus()).skip(dollar)
   
   /** 
    * because there is a simplified version of 
@@ -1247,18 +1257,13 @@
    * takes precedence over those macros. 
    *
    */
-  const element = token(x => !special(x)).plus()
-    .or(value)
+  const element = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
     .or(comment)
     .or(mathstyle)
-    .or(suporsub)
-    .or(environ)
-    .or(fixedMacro)
-    .or(unaryMacro)
-    .or(binaryMacro)
+    .or(mathelem)
   //
   
-  const doubleBackslash = string('\\\\')
+  const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('\\\\')
   const section = doubleBackslash.or(element).plus()
   
   // console.log(environ.parse(String.raw`\begin{bmatrix} 
@@ -1269,11 +1274,14 @@
   
   const unknownMacro = macroh.map(x => '\\' + x)
   
-  const text = element.or(unknownMacro).plus()
+  const spectrum = element.or(unknownMacro)
+  const text = spectrum.plus()
   
   const UniTeX = {
     parse: s => (x => x ? x[0] : '')(text.parse(s))
   }
+  
+  
   
   })();
   
