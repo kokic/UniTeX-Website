@@ -92,13 +92,34 @@
 
   <script>
 
+    const handleQuery = function (name, value) {
+      switch (name) {
+        case 'tex':
+          elemTeXArea.value = value
+          updateUnicodeBoard()
+          break
+      }
+    }
+
+    const handleQueries = xs => xs
+      .map(x => x.split('='))
+      .forEach(x => handleQuery(x[0], x[1]))
+
+    const updateUnicodeBoard = function () {
+      elemUnicodeBoard.innerText = UniTeX.parse(elemTeXArea.value)
+    }
+
     const createElement = name => document.createElement(name)
-    
+
     const elemTeXArea = document.getElementById('tex-area')
+
     const copyUnicode = document.getElementById('copy-unicode')
     const elemUnicodeBoard = document.getElementById('unicode-board')
 
     const copiesBridge = createElement('input')
+
+    const search = window.location.search
+    search && handleQueries(search.substring(1).split('&'))
 
     copyUnicode.addEventListener('click', function () {
       copiesBridge.value = elemUnicodeBoard.innerText
@@ -108,9 +129,7 @@
       leftside.removeChild(copiesBridge)
     })
 
-    elemTeXArea.addEventListener('input', function () {
-      elemUnicodeBoard.innerText = UniTeX.parse(elemTeXArea.value)
-    })
+    elemTeXArea.addEventListener('input', updateUnicodeBoard())
 
     const width = document.body.clientWidth
     const columns = Math.round(width / 25 + 15)
