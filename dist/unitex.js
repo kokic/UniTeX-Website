@@ -347,7 +347,8 @@
     }, 
   
     __block__: {
-      frac: (x, y) => _utils_block_js__WEBPACK_IMPORTED_MODULE_0__["default"].frac(x, y)
+      frac: (x, y) => _utils_block_js__WEBPACK_IMPORTED_MODULE_0__["default"].frac(x, y), 
+      overset: (x, y) => Binary.overset(x.string, y.string).toBlock()
     }
   }
   Binary['cfrac'] = Binary.frac
@@ -371,8 +372,9 @@
     if (residue == n) return ' '.repeat(n)
     if (residue == 0) return this
     if (residue < 0) return this.substring(0, n)
-    const halfspace = ' '.repeat(residue / 2)
-    return halfspace + this + halfspace
+    const left = Math.floor(residue / 2)
+    const right = residue - left
+    return ' '.repeat(left) + this + ' '.repeat(right)
   }
   
   const Block = function (data, baseline = 0) {
@@ -382,24 +384,12 @@
     this.string = this.data.join('\n')
     this.baseline = baseline
   
-    // this.verticalize = function () {
-    // return new Block(this.data.map(x => x.fill(this.width)))
-    // }
-  
-    // this.heightlift = function (n) {
-    //   const halfline = Array((n - this.height) / 2).fill('')
-    //   return new Block(halfline.concat(this.data).concat(halfline))
-    // }
-  
     this.blocklift = function (n, offset) {
       const residue = n - this.height
       if (residue == 0) return this
       const topline = Array(offset).fill('')
       const bottomline = Array(residue - offset).fill('')
       return new Block(topline.concat(this.data).concat(bottomline))
-      // const halfline = Array((n - this.height) / 2).fill('')
-      // const xs = halfline.concat(this.data).concat(halfline)
-      // return new Block(xs)
     }
   
     this.append = function (block) {
@@ -424,7 +414,14 @@
       return new Block(data.map(x => x.fill(width)), this.height)
     }
   }
-  Block.plus = new Block([' + '])
+  
+  String.prototype.toBlock = function () {
+    return new Block([this])
+  }
+  Block.of = s => s.toBlock()
+  
+  Block.empty = ''.toBlock()
+  Block.plus = ' + '.toBlock()
   
   const fracByString = function (x, y) {
     const width = Math.max(x.length, y.length) + 2
@@ -433,16 +430,12 @@
   }
   
   const frac = function (a, b) {
-    if (typeof a == 'string' && typeof b == 'string') return fracByString(a, b)
     if (a instanceof Block && b instanceof Block) return a.over(b)
+    if (typeof a == 'string' && typeof b == 'string') return fracByString(a, b)
     if (typeof a == 'string') return frac(new Block([a]), b)
     if (typeof b == 'string') return frac(a, new Block([b]))
   }
   Block.frac = frac
-  
-  String.prototype.toBlock = function () {
-    return new Block([this])
-  }
   
   String.prototype.add = function (x) {
     const other = typeof x == 'string' ? x.toBlock() : x
@@ -453,14 +446,12 @@
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Block);
   
-  // const a = new Block(['a'])
-  // const x = new Block(['x'])
-  // const u = new Block(['u'])
-  
   // const frac1 = frac('a', 'b')
   // const frac2 = frac('x', 'y + z')
   
   // const frac3 = frac('u', x.add(frac1))
+  
+  
   
   
   /***/ }),
@@ -556,6 +547,32 @@
     Box: '□',
     S: '§',
     sect: '§',
+  
+    /* Delimiters */
+    '|': '∥', 
+    lang: '⟨', 
+    rang: '⟩', 
+    vert: '∣', 
+    Vert: '∥', 
+    lVert: '∥', 
+    rVert: '∥', 
+    lceil: '⌈', 
+    rceil: '⌉', 
+    lfloor: '⌊',
+    rfloor: '⌋', 
+    lmoustache: '⎰', 
+    rmoustache: '⎱', 
+    lgroup: '⟮', 
+    rgroup: '⟯', 
+    ulcorner: '┌', 
+    urcorner: '┐', 
+    llcorner: '└', 
+    lrcorner: '┘', 
+    llbracket: '[[', 
+    rlbracket: ']]', 
+    lBrace: '{[', 
+    rBrace: ']}', 
+  
   
     /* Big Operators */
     bigotimes: '⨂',
@@ -656,7 +673,7 @@
   
     nsimeq: '≄',
     congneq: '≆',
-    nappox: '≉', // original
+    napprox: '≉', // original
   
     eq: '=',
     ne: '≠',
@@ -1487,7 +1504,8 @@
   /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
   /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
   /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(8);
-  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(9);
+  /* harmony import */ var _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(5);
+  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(9);
   
   
   
@@ -1498,30 +1516,36 @@
   
   
   
-  const backslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('\\')
   
-  const lbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('{')
-  const rbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('}')
+  const backslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('\\')
+  
+  const lbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('{')
+  const rbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('}')
   const braceWrap = x => lbrace.move(x).skip(rbrace)
   
-  const lbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('[')
-  const rbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)(']')
+  const lbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('[')
+  const rbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)(']')
   const bracketWrap = x => lbracket.move(x).skip(rbracket)
   
   const special = x => '\\{}_^%$'.includes(x)
   // const unit = digit.skip(string('em'))
   
-  const valuesymbol = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x))
-  const single = _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.digit.or(_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.letter).or(valuesymbol).or(() => fixedMacro)
-  const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.loose)(single.or(braceWrap(() => text)))
+  const literal = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !special(x))
+  const literals = literal.plus()
+  
+  const solid = x => x.trim().length == 1
+  const valuesymbol = literal.check(solid)
+  const single = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.digit.or(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letter).or(valuesymbol).or(() => fixedMacro)
+  const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single.or(braceWrap(() => text)))
   const optional = bracketWrap(value) // [value]
   
-  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.includes)(...',>:!()[]{}_%\\')
+  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:!()[]{}_%\\')
   
-  const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.letters.or(symbolMacros)
+  const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters.or(symbolMacros)
   
   const macroh = backslash.move(macroName)
-  const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
+  const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x] != undefined)
+    .map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
   
   // [macro, value]
   const unaryOrdinaryMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x])
@@ -1542,9 +1566,9 @@
     .follow(value)
     .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
   
-  const envira = braceWrap(_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.letters)
-  const begin = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('begin')).move(envira)
-  const end = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('end')).move(envira)
+  const envira = braceWrap(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters)
+  const begin = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('begin')).move(envira)
+  const end = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('end')).move(envira)
   // [[begin, text], end]
   const environ = begin.follow(() => section).follow(end)
     .check(xs => xs[0][0] == xs[1])
@@ -1552,15 +1576,15 @@
   //
   
   
-  const supscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('^').move(value)
+  const supscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('^').move(value)
     .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].suprender)
-  const subscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('_').move(value)
+  const subscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('_').move(value)
     .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subrender)
   const suporsub = supscript.or(subscript)
   
-  const comment = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('%')
-    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => x != '\n').asterisk())
-    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('\n'))
+  const comment = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('%')
+    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => x != '\n').asterisk())
+    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('\n'))
     .map(() => '')
   //
   
@@ -1575,7 +1599,7 @@
   //
   
   // inline
-  const inlineElem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
+  const inlineElem = literals
     .or(value)
     .or(suporsub)
     .or(environ)
@@ -1585,18 +1609,18 @@
   const inlineCluster = typeface
     .or(inlineElem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
     .plus()
-  const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('$')
+  const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('$')
   const inlineMath = dollar.move(inlineCluster).skip(dollar)
   
   
   
   
   // block
-  const blockInfix = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => '+-*/<>~'.includes(x))
+  const blockInfix = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => '+-*/<>~'.includes(x))
     .or(macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"].infixs.includes(x)).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]))
     .map(x => ` ${x} `.toBlock())
   
-  const blockValue = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.loose)(single
+  const blockValue = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single
     .map(x => x.toBlock())
     .or(braceWrap(() => blockCluster)))
   const blockBinaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[x])
@@ -1605,13 +1629,17 @@
     .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[xs[0][0]](xs[0][1], xs[1]))
   
   const blockElem = blockInfix
-      .or(fixedMacro.map(x => x.toBlock()))
-      .or(blockValue)
-      .or(blockBinaryMacro)
+    .or(blockValue) // csp. value
+    .or(suporsub.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
+    .or(fixedMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
+    .or(unaryMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
+    .or(blockBinaryMacro) // csp. binary
+    .or((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !solid(x)).some().map(x => _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].empty))
+  
   const blockCluster = blockElem.some()
     .map(x => x.reduce((s, t) => s.append(t)))
   
-  const doubleDollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('$$')
+  const doubleDollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('$$')
   const blockMath = doubleDollar
     .move(blockCluster.map(x => x.string))
     .skip(doubleDollar)
@@ -1631,13 +1659,13 @@
    * takes precedence over those macros. 
    *
    */
-  const element = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
+  const element = literals
     .or(comment)
     .or(mathstyle)
     .or(inlineElem)
   //
   
-  const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('\\\\')
+  const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('\\\\')
   const section = doubleBackslash.or(element).plus()
   
   // console.log(environ.parse(String.raw`\begin{bmatrix} 
