@@ -325,17 +325,30 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
-  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
-  /* harmony import */ var _unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+  /* harmony import */ var _utils_block_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
+  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
+  /* harmony import */ var _fixed_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(6);
   
   
   
+  // import Unicode from '../utils/unicode.js'
   
+  // import Unary from './unary.js'
   
   const Binary = {
-    frac: (x, y) => `${_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x)}/${_utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(y)}`,
-    
+    frac: (x, y) => `${_utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(x)}/${_utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(y)}`,
+    overset: function (x, y) {
+      if (x == '?' && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].qeq
+      if (x == 'm' && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].meq
+      if (x == 'def' && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].defeq
+      if (x == _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].star && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].stareq
+      if (x == _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].Delta && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].deltaeq
+      return `\\overset\{${x}\}\{${y}\}`
+    }, 
+  
+    __block__: {
+      frac: (x, y) => _utils_block_js__WEBPACK_IMPORTED_MODULE_0__["default"].frac(x, y)
+    }
   }
   Binary['cfrac'] = Binary.frac
   Binary['dfrac'] = Binary.frac
@@ -352,47 +365,102 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
-  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
   
+  String.prototype.fill = function (n) {
+    const residue = n - this.length
+    if (residue == n) return ' '.repeat(n)
+    if (residue == 0) return this
+    if (residue < 0) return this.substring(0, n)
+    const halfspace = ' '.repeat(residue / 2)
+    return halfspace + this + halfspace
+  }
   
+  const Block = function (data, baseline = 0) {
+    this.width = Math.max(...data.map(x => x.length))
+    this.height = data.length
+    this.data = data.map(x => x.fill(this.width))
+    this.string = this.data.join('\n')
+    this.baseline = baseline
   
+    // this.verticalize = function () {
+    // return new Block(this.data.map(x => x.fill(this.width)))
+    // }
   
-  const Unary = {
-    id: x => x,
-    text: x => x, 
+    // this.heightlift = function (n) {
+    //   const halfline = Array((n - this.height) / 2).fill('')
+    //   return new Block(halfline.concat(this.data).concat(halfline))
+    // }
   
-    sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x),
-    cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
-    furt: x => '∜' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
+    this.blocklift = function (n, offset) {
+      const residue = n - this.height
+      if (residue == 0) return this
+      const topline = Array(offset).fill('')
+      const bottomline = Array(residue - offset).fill('')
+      return new Block(topline.concat(this.data).concat(bottomline))
+      // const halfline = Array((n - this.height) / 2).fill('')
+      // const xs = halfline.concat(this.data).concat(halfline)
+      // return new Block(xs)
+    }
   
-    hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : '-hat'),
-    tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : '-tilde'),
-    bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'),
-    overline: x => x,
-    breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : '-breve'),
+    this.append = function (block) {
+      const major = this.height > block.height
+      const supbase = this.baseline > block.baseline
+      const offset = supbase
+        ? this.baseline - block.baseline
+        : block.baseline - this.baseline
+      const baseline = supbase ? this.baseline : block.baseline
+      const [left, right] = major
+        ? [this.data, block.blocklift(this.height, offset).data]
+        : [this.blocklift(block.height, offset).data, block.data]
+      return new Block(left.map((v, i) => v + right[i]), baseline)
+    }
+    
+    this.add = block => this.append(Block.plus).append(block)
   
-    kern: x => x.endsWith('em') ? ' '.repeat(x.substring(0, x.length - 2)) : ' ',
-  
-    __optional__: {
-      sqrt: (n, x) =>
-        n == 2 ? Unary.sqrt(x) :
-          n == 3 ? Unary.cbrt(x) :
-            n == 4 ? Unary.furt(x) :
-              _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].suprender(n) + Unary.sqrt(x), 
+    this.over = function (block) {
+      const width = Math.max(this.width, block.width) + 2
+      const fracline = '-'.repeat(width)
+      const data = [...this.data, fracline, ...block.data]
+      return new Block(data.map(x => x.fill(width)), this.height)
     }
   }
-  Unary.mkern = Unary.kern
-  Unary.mskip = Unary.kern
-  Unary.hskip = Unary.kern
-  Unary.hspace = Unary.kern
+  Block.plus = new Block([' + '])
   
-  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
+  const fracByString = function (x, y) {
+    const width = Math.max(x.length, y.length) + 2
+    const data = [x.fill(width), '-'.repeat(width), y.fill(width)]
+    return new Block(data, 1)
+  }
   
-  /* just for typeface: Parser */
-  Unary.typefaceNames = ['text', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames]
+  const frac = function (a, b) {
+    if (typeof a == 'string' && typeof b == 'string') return fracByString(a, b)
+    if (a instanceof Block && b instanceof Block) return a.over(b)
+    if (typeof a == 'string') return frac(new Block([a]), b)
+    if (typeof b == 'string') return frac(a, new Block([b]))
+  }
+  Block.frac = frac
   
-  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Unary);
+  String.prototype.toBlock = function () {
+    return new Block([this])
+  }
+  
+  String.prototype.add = function (x) {
+    const other = typeof x == 'string' ? x.toBlock() : x
+    return this.toBlock().add(other)
+  }
+  
+  
+  
+  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Block);
+  
+  // const a = new Block(['a'])
+  // const x = new Block(['x'])
+  // const u = new Block(['u'])
+  
+  // const frac1 = frac('a', 'b')
+  // const frac2 = frac('x', 'y + z')
+  
+  // const frac3 = frac('u', x.add(frac1))
   
   
   /***/ }),
@@ -446,6 +514,33 @@
     liminf: 'lim inf',
     limsup: 'lim sup',
     projlim: 'proj lim',
+  
+  
+    /* Infix Names */ 
+    infixs: [
+      'plus',            'minus',         /* stub */
+      'cdot',            'gtrdot',        'cdotp',
+      'intercal',        'centerdot',     'land',
+      'rhd',             'circ',          'leftthreetimes',
+      'rightthreetimes', 'amalg',         'circledast',
+      'ldotp',           'rtimes',        'And',
+      'circledcirc',     'lor',           'setminus',
+      'ast',             'circleddash',   'lessdot',
+      'smallsetminus',   'barwedge',      'Cup',
+      'lhd',             'sqcap',         'bigcirc',
+      'cup',             'ltimes',        'sqcup',
+      'bmod',            'curlyvee',      'mod',
+      'times',           'boxdot',        'curlywedge',
+      'mp',              'unlhd',         'boxminus',
+      'div',             'odot',          'unrhd',
+      'boxplus',         'divideontimes', 'ominus',
+      'uplus',           'boxtimes',      'dotplus',
+      'oplus',           'vee',           'bullet',
+      'doublebarwedge',  'otimes',        'veebar',
+      'Cap',             'doublecap',     'oslash',
+      'wedge',           'cap',           'doublecup',
+      'pm',              'plusmn',        'wr'
+    ], 
   
     cdot: '⋅',
     cdotp: '⋅',
@@ -524,6 +619,7 @@
   
     coprod: '∐',
     sum: '∑',
+    plus: '+', 
     minus: '−',
     mp: '∓',
     dotplus: '∔',
@@ -916,39 +1012,40 @@
     top: '⊤',
     bot: '⊥',
     mho: '℧',
+    star: '⋆', 
+    bigstar: '★', 
   
   }
   
   const operatornames = [
     'arcsin', 'arccos', 'arctan', 'arctg',
-    'arcctg', 'arg', 'ch', 'cos',
-    'det', 'gcd', 'inf', 'cosec',
-    'cosh', 'cot', 'cotg', 'coth',
-    'csc', 'ctg', 'cth', 'lim',
-    'max', 'deg', 'dim', 'exp',
-    'hom', 'ker', 'lg', 'ln',
-    'log', 'min', 'plim', 'Pr',
-    'sup', 'sec', 'sin', 'sinh',
-    'sh', 'tan', 'tanh', 'tg',
+    'arcctg', 'arg',    'ch',     'cos',
+    'det',    'gcd',    'inf',    'cosec',
+    'cosh',   'cot',    'cotg',   'coth',
+    'csc',    'ctg',    'cth',    'lim',
+    'max',    'deg',    'dim',    'exp',
+    'hom',    'ker',    'lg',     'ln',
+    'log',    'min',    'plim',   'Pr',
+    'sup',    'sec',    'sin',    'sinh',
+    'sh',     'tan',    'tanh',   'tg',
     'th'
   ]
   operatornames.forEach(x => Fixed[x] = x)
   
   
   const greeks = [
-    'Alpha', 'Beta', 'Gamma', 'Delta',
-    'Epsilon', 'Zeta', 'Eta', 'Theta',
-    'Iota', 'Kappa', 'Lambda', 'Mu',
-    'Nu', 'Xi', 'Omicron', 'Pi',
-    'Rho', 'Sigma', 'Tau', 'Upsilon',
-    'Phi', 'Chi', 'Psi', 'Omega',
-  
-    'alpha', 'beta', 'gamma', 'delta',
-    'epsilon', 'zeta', 'eta', 'theta',
-    'iota', 'kappa', 'lambda', 'mu',
-    'nu', 'xi', 'omicron', 'pi',
-    'rho', 'sigma', 'tau', 'upsilon',
-    'phi', 'chi', 'psi', 'omega'
+    'Alpha',   'Beta',  'Gamma',   'Delta',
+    'Epsilon', 'Zeta',  'Eta',     'Theta',
+    'Iota',    'Kappa', 'Lambda',  'Mu',
+    'Nu',      'Xi',    'Omicron', 'Pi',
+    'Rho',     'Sigma', 'Tau',     'Upsilon',
+    'Phi',     'Chi',   'Psi',     'Omega',
+    'alpha',   'beta',  'gamma',   'delta',
+    'epsilon', 'zeta',  'eta',     'theta',
+    'iota',    'kappa', 'lambda',  'mu',
+    'nu',      'xi',    'omicron', 'pi',
+    'rho',     'sigma', 'tau',     'upsilon',
+    'phi',     'chi',   'psi',     'omega'
   ]
   greeks.forEach((x, i) => Fixed[x] = _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].greeks[i])
   
@@ -965,6 +1062,57 @@
   
   /***/ }),
   /* 7 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+  /* harmony export */ });
+  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
+  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+  
+  
+  
+  
+  const Unary = {
+    id: x => x,
+    text: x => x, 
+  
+    sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x),
+    cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
+    furt: x => '∜' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
+  
+    hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : '-hat'),
+    tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : '-tilde'),
+    bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'),
+    overline: x => x,
+    breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : '-breve'),
+  
+    kern: x => x.endsWith('em') ? ' '.repeat(x.substring(0, x.length - 2)) : ' ',
+  
+    __optional__: {
+      sqrt: (n, x) =>
+        n == 2 ? Unary.sqrt(x) :
+          n == 3 ? Unary.cbrt(x) :
+            n == 4 ? Unary.furt(x) :
+              _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].suprender(n) + Unary.sqrt(x), 
+    }
+  }
+  Unary.mkern = Unary.kern
+  Unary.mskip = Unary.kern
+  Unary.hskip = Unary.kern
+  Unary.hspace = Unary.kern
+  
+  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
+  
+  /* just for typeface: Parser */
+  Unary.typefaceNames = ['text', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames]
+  
+  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Unary);
+  
+  
+  /***/ }),
+  /* 8 */
   /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
   
   __webpack_require__.r(__webpack_exports__);
@@ -1054,7 +1202,7 @@
   
   
   /***/ }),
-  /* 8 */
+  /* 9 */
   /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
   
   __webpack_require__.r(__webpack_exports__);
@@ -1214,7 +1362,9 @@
     )
   }
   
-  
+  Parser.prototype.log = function (s) {
+    return this.map(x => (console.log(s + x), x))
+  }
   
   
   const token = predicate => new Parser(
@@ -1334,10 +1484,10 @@
   /* harmony export */ });
   /* harmony import */ var _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
   /* harmony import */ var _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
-  /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+  /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
   /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
-  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(7);
-  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(8);
+  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(8);
+  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(9);
   
   
   
@@ -1358,7 +1508,7 @@
   const rbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)(']')
   const bracketWrap = x => lbracket.move(x).skip(rbracket)
   
-  const special = x => [...'\\{}_^%$'].includes(x)
+  const special = x => '\\{}_^%$'.includes(x)
   // const unit = digit.skip(string('em'))
   
   const valuesymbol = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x))
@@ -1415,22 +1565,64 @@
   //
   
   
-  const mathelem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
+  
+  
+  
+  const typeface = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.includes(x))
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
+  
+  //
+  
+  // inline
+  const inlineElem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
     .or(value)
     .or(suporsub)
     .or(environ)
     .or(fixedMacro)
     .or(unaryMacro)
     .or(binaryMacro)
-  
-  const typeface = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.includes(x))
-    .follow(value)
-    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
-  
+  const inlineCluster = typeface
+    .or(inlineElem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
+    .plus()
   const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.character)('$')
-  // inline
-  const mathrender = typeface.or(() => mathelem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
-  const mathstyle = dollar.move(mathrender.plus()).skip(dollar)
+  const inlineMath = dollar.move(inlineCluster).skip(dollar)
+  
+  
+  
+  
+  // block
+  const blockInfix = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => '+-*/<>~'.includes(x))
+    .or(macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"].infixs.includes(x)).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]))
+    .map(x => ` ${x} `.toBlock())
+  
+  const blockValue = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.loose)(single
+    .map(x => x.toBlock())
+    .or(braceWrap(() => blockCluster)))
+  const blockBinaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[x])
+    .follow(blockValue)
+    .follow(blockValue)
+    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[xs[0][0]](xs[0][1], xs[1]))
+  
+  const blockElem = blockInfix
+      .or(fixedMacro.map(x => x.toBlock()))
+      .or(blockValue)
+      .or(blockBinaryMacro)
+  const blockCluster = blockElem.some()
+    .map(x => x.reduce((s, t) => s.append(t)))
+  
+  const doubleDollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('$$')
+  const blockMath = doubleDollar
+    .move(blockCluster.map(x => x.string))
+    .skip(doubleDollar)
+  //
+  
+  
+  
+  
+  
+  
+  const mathstyle = blockMath.or(inlineMath)
   
   /** 
    * because there is a simplified version of 
@@ -1442,7 +1634,7 @@
   const element = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.token)(x => !special(x)).plus()
     .or(comment)
     .or(mathstyle)
-    .or(mathelem)
+    .or(inlineElem)
   //
   
   const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_5__.string)('\\\\')
