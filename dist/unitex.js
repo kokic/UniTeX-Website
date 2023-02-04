@@ -484,6 +484,34 @@
     Complex: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.C,
     Bbbk: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.k,
   
+  
+    /* Frequent */
+  
+  
+    /* Variant */
+    varGamma: 'Γ', 
+    varDelta: 'Δ', 
+    varTheta: 'Θ', 
+    varLambda: 'Λ', 
+    varXi: 'Ξ', 
+    varPi: 'Π', 
+    varSigma: 'Σ', 
+    varUpsilon: 'Υ', 
+    varPhi: 'Φ', 
+    varPsi: 'Ψ', 
+    varOmega: 'Ω', 
+  
+    varepsilon: 'ε', 
+    varkappa: 'ϰ', 
+    vartheta: 'ϑ', 
+    thetasym: 'ϑ', 
+    varpi: 'ϖ', 
+    varrho: 'ϱ', 
+    varsigma: 'ς', 
+    varphi: 'φ', 
+    digamma: 'ϝ', 
+  
+  
     /* Theorem */
   
     proposition: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Proposition', 'textbf'),
