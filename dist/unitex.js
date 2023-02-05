@@ -485,6 +485,19 @@
     Bbbk: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].typeface.mathbb.k,
   
   
+    /**
+     * In order to express my respect to all TeX-related project developers, 
+     * I reserve these special macro commands and follow the consistent tradition 
+     * to  to implement UniTeX.
+     */
+  
+    TeX: 'TᴇX', 
+    LaTeX: 'LᴬTᴇX', 
+    KaTeX: 'KᴬTᴇX', 
+    UniTeX: 'UⁿᵢTᴇX', 
+  
+  
+  
     /* Frequent */
   
   
@@ -494,7 +507,7 @@
     varTheta: 'Θ', 
     varLambda: 'Λ', 
     varXi: 'Ξ', 
-    varPi: 'Π', 
+    varPi: 'ϖ', 
     varSigma: 'Σ', 
     varUpsilon: 'Υ', 
     varPhi: 'Φ', 
@@ -513,7 +526,6 @@
   
   
     /* Theorem */
-  
     proposition: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Proposition', 'textbf'),
     lemma: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Lemma', 'textbf'),
     theorem: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Theorem', 'textbf'),
@@ -1093,6 +1105,8 @@
     'phi',     'chi',   'psi',     'omega'
   ]
   greeks.forEach((x, i) => Fixed[x] = _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].greeks[i])
+  Fixed.epsilon = 'ϵ'
+  
   
   // fixed symbol as supscripts
   _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].supscripts[Fixed.times] = _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].supscripts.x
