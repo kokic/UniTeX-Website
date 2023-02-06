@@ -1606,7 +1606,7 @@
     .follow(value)
     .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[xs[0][0]](xs[0][1], xs[1]))
   
-  const unaryMacro = unaryOrdinaryMacro.or(unaryOptionalMacro)
+  const unaryMacro = unaryOptionalMacro.or(unaryOrdinaryMacro)
   
   // [[macro, value1], value2]
   const binaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][x])
@@ -1648,7 +1648,6 @@
     .or(value)
     .or(suporsub)
     .or(environ)
-    
     .or(unaryMacro)
     .or(binaryMacro)
   const inlineCluster = typeface
@@ -1718,7 +1717,6 @@
     parse: s => (x => x ? x[0] : '')(text.parse(s))
   }
   
-  console.log(UniTeX.parse(String.raw`$$\int_0^a\,e^{-x}\,\mathrm{d}x\,=\,\cfrac{\sqrt\pi}{2}-\cfrac{e^{-a^2}}{2a+\cfrac{1}{a+\cfrac{2}{2a+\cfrac{3}{a+\cfrac{4}{2a+\cdots}}}}}$$`))
   
   })();
   

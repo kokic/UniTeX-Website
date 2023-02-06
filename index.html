@@ -76,7 +76,11 @@
 
     pre {
       font-size: 1.25em;
-      font-family: UbuntuMono, TexGyrePagella, LatinModern-Math, serif, sans-serif;
+      font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
+    }
+
+    #typeface-set {
+      margin: 5px 0px;
     }
   </style>
 
@@ -88,7 +92,16 @@
     <div id="copy-unicode">copy</div>
   </div>
   <pre id="unicode-board"></pre>
-  <a class="vert-top" href="https://github.com/kokic/UniTeX">Github</a>
+  <a class="vert-top" href="https://github.com/kokic/UniTeX">[ Github ]</a>
+
+  <div id="typeface-set">
+    <label for="output-typeface">Output Typeface</label>
+    <select name="typefaces" id="output-typeface">
+      <option value="TexGyrePagella, LatinModern-Math">Default</option>
+      <option value="UbuntuMono">Ubuntu Mono</option>
+      <option value="monospace">Monospace</option>
+    </select>
+  </div>
 
   <script>
 
@@ -112,7 +125,6 @@
     const createElement = name => document.createElement(name)
 
     const elemTeXArea = document.getElementById('tex-area')
-
     const copyUnicode = document.getElementById('copy-unicode')
     const elemUnicodeBoard = document.getElementById('unicode-board')
 
@@ -135,6 +147,13 @@
     const columns = Math.round(width / 25 + 15)
     elemTeXArea.cols = [] + columns
     elemTeXArea.rows = [] + columns / 4
+
+    const baseTypeface = 'serif, sans-serif'
+    const elemOutputTypeface = document.getElementById('output-typeface')
+    elemOutputTypeface.addEventListener('click', function () {
+      const value = elemOutputTypeface.value + ', ' + baseTypeface
+      elemUnicodeBoard.style.fontFamily = value
+    })
 
   </script>
 </body>
