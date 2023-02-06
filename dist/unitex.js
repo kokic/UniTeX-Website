@@ -351,9 +351,14 @@
       overset: (x, y) => Binary.overset(x.string, y.string).toBlock()
     }
   }
+  
   Binary['cfrac'] = Binary.frac
   Binary['dfrac'] = Binary.frac
   Binary['tfrac'] = Binary.frac
+  
+  Binary.__block__['cfrac'] = Binary.__block__.frac
+  Binary.__block__['dfrac'] = Binary.__block__.frac
+  Binary.__block__['tfrac'] = Binary.__block__.frac
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Binary);
   
@@ -1136,6 +1141,7 @@
   const Unary = {
     id: x => x,
     text: x => x, 
+    mathrm: x => x, 
   
     sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x),
     cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
@@ -1165,7 +1171,7 @@
   _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
   
   /* just for typeface: Parser */
-  Unary.typefaceNames = ['text', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames]
+  Unary.typefaceNames = ['text', 'mathrm', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames]
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Unary);
   
@@ -1631,9 +1637,6 @@
   //
   
   
-  
-  
-  
   const typeface = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.includes(x))
     .follow(value)
     .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
@@ -1645,10 +1648,11 @@
     .or(value)
     .or(suporsub)
     .or(environ)
-    .or(fixedMacro)
+    
     .or(unaryMacro)
     .or(binaryMacro)
   const inlineCluster = typeface
+    .or(fixedMacro)
     .or(inlineElem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
     .plus()
   const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('$')
@@ -1687,11 +1691,6 @@
     .skip(doubleDollar)
   //
   
-  
-  
-  
-  
-  
   const mathstyle = blockMath.or(inlineMath)
   
   /** 
@@ -1710,12 +1709,6 @@
   const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('\\\\')
   const section = doubleBackslash.or(element).plus()
   
-  // console.log(environ.parse(String.raw`\begin{bmatrix} 
-  //   0 & 1 \\ 
-  //   1 & 0 
-  // \end{bmatrix}`))
-  
-  
   const unknownMacro = macroh.map(x => '\\' + x)
   
   const spectrum = element.or(unknownMacro)
@@ -1725,7 +1718,7 @@
     parse: s => (x => x ? x[0] : '')(text.parse(s))
   }
   
-  
+  console.log(UniTeX.parse(String.raw`$$\int_0^a\,e^{-x}\,\mathrm{d}x\,=\,\cfrac{\sqrt\pi}{2}-\cfrac{e^{-a^2}}{2a+\cfrac{1}{a+\cfrac{2}{2a+\cfrac{3}{a+\cfrac{4}{2a+\cdots}}}}}$$`))
   
   })();
   
