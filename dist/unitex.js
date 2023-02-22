@@ -54,10 +54,10 @@
       return through
         ? array.map(x => charset[x]).join('')
         : otherwise(str)
-    }, 
+    },
   
-    suprender: s => Unicode.corender(Unicode.supscripts, s, x => '^' + _proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].brace(x)), 
-    subrender: s => Unicode.corender(Unicode.subscripts, s, x => '_' + _proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].brace(x)), 
+    suprender: s => Unicode.corender(Unicode.supscripts, s, x => '^' + _proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].brace(x)),
+    subrender: s => Unicode.corender(Unicode.subscripts, s, x => '_' + _proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].brace(x)),
   }
   
   Unicode.letterUppers = Unicode.series('A', 'Z')
@@ -246,7 +246,6 @@
   
   
   
-  // console.log(Unicode.supscripts)
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Unicode);
   
@@ -331,9 +330,7 @@
   
   
   
-  // import Unicode from '../utils/unicode.js'
   
-  // import Unary from './unary.js'
   
   const Binary = {
     frac: (x, y) => `${_utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(x)}/${_utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(y)}`,
@@ -493,7 +490,7 @@
     /**
      * In order to express my respect to all TeX-related project developers, 
      * I reserve these special macro commands and follow the consistent tradition 
-     * to  to implement UniTeX.
+     * to implement UniTeX.
      */
   
     TeX: 'TᴇX', 
@@ -501,10 +498,39 @@
     KaTeX: 'KᴬTᴇX', 
     UniTeX: 'UⁿᵢTᴇX', 
   
+    /* Accents */
+    hat: '\u0302', 
+    tilde: '\u0303', 
+    bar: '\u0304', 
+    overline: '\u0305', 
+    breve: '\u0306', 
   
+    widetilde: '\u0360', 
+  
+    uwidebreve: '\u035c', 
+    widebreve: '\u035d', 
+    widepreve: '\u0361', 
+  
+    uvec: '\u0362', 
+  
+    overa: '\u0363', // original
+    overe: '\u0364', // original
+    overi: '\u0365', // original
+    overo: '\u0366', // original
+    overu: '\u0367', // original
+  
+    overc: '\u0368', // original
+    overd: '\u0369', // original
+    overh: '\u036A', // original
+    overm: '\u036B', // original
+    overr: '\u036C', // original
+    overt: '\u036E', // original
+    overx: '\u036F', // original
+  
+    
   
     /* Frequent */
-  
+    degree: '°', 
   
     /* Variant */
     varGamma: 'Γ', 
@@ -528,8 +554,8 @@
     varsigma: 'ς', 
     varphi: 'φ', 
     digamma: 'ϝ', 
-  
-  
+    
+    
     /* Theorem */
     proposition: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Proposition', 'textbf'),
     lemma: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Lemma', 'textbf'),
@@ -543,7 +569,7 @@
     example: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('Example', 'textbf'),
     proof: _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render('proof', 'textit'),
   
-    /* combined operatorname */
+    /* Combined Operatorname */
     argmax: 'arg max',
     argmin: 'arg min',
     injlim: 'inj lim',
@@ -730,6 +756,11 @@
     defeq: '≝', // original
     qeq: '≟', // original
   
+    questeq: '≟', // fcitx & ibus
+    arceq: '≘', // fcitx & ibus
+    wedgeq: '≙', // fcitx & ibus
+    veeeq: '≚', // fcitx & ibus
+    circeq: '≗', // fcitx & ibus
     smile: '⌣',
   
     /* Relations */
@@ -1076,7 +1107,14 @@
     mho: '℧',
     star: '⋆', 
     bigstar: '★', 
+    Game: '⅁', 
   
+    /* exp */
+    sumtop: '⎲', 
+    sumtop: '⎳', 
+    lbraceuend: '⎧', 
+    lbracemid: '⎨', 
+    lbracelend: '⎩', 
   }
   
   const operatornames = [
@@ -1121,6 +1159,11 @@
   _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subscripts[Fixed.ni] = Fixed.smallni
   
   
+  
+  // Gothic
+  const gothics = ['ahsa', 'bairkan', 'giba', 'dags', 'aihvus']
+  
+  
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Fixed);
   
   
@@ -1150,7 +1193,7 @@
     hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : '-hat'),
     tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : '-tilde'),
     bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'),
-    overline: x => x,
+    overline: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0305' : '-underline'),
     breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : '-breve'),
   
     kern: x => x.endsWith('em') ? ' '.repeat(x.substring(0, x.length - 2)) : ' ',
@@ -1211,12 +1254,12 @@
     conjecture: xs => theoremstyle('conjecture', xs),
     axiom: xs => theoremstyle('axiom', xs),
     example: xs => theoremstyle('example', xs),
-    proof: xs => theoremstyle('proof', xs), 
+    proof: xs => theoremstyle('proof', xs),
   
     // misc family
     // center: xs => xs,
   
-    // document: xs => xs, 
+    // document: xs => xs,
   }
   
   const doubleBackslash = '\\\\'
@@ -1225,7 +1268,6 @@
   
   const regMatrix = function (gel, ls, rs, lg = ls, rg = rs) {
     const xs = gel.split(doubleBackslash)
-    // console.log(xs)
     const s = ''.concat(...xs.map(x => ls + matrim(x) + rs))
     return xs.length > 1 ? lg + s + rg : s
   }
@@ -1238,12 +1280,12 @@
   
   
   /**
-   * Adjustments to text formatting (such as spaces, line breaks, and indents) 
-   * are made after macro replacement Therefore, the current processing is not 
-   * friendly to macros such as quad The specific scheme for the format in the 
-   * environment is still under discussion, so this question will be put on 
+   * Adjustments to text formatting (such as spaces, line breaks, and indents)
+   * are made after macro replacement Therefore, the current processing is not
+   * friendly to macros such as quad The specific scheme for the format in the
+   * environment is still under discussion, so this question will be put on
    * hold temporarily.
-   * 
+   *
    */
   const polymerizeTeX = function (s) {
     let result = s.trim()
@@ -1256,7 +1298,6 @@
   
   const theoremstyle = function (type, content) {
     let title = _fixed_js__WEBPACK_IMPORTED_MODULE_0__["default"][type] + '. '
-    console.log(content)
     return title + content
       .split(regexpDoubleLine)
       .map(polymerizeTeX)
@@ -1645,13 +1686,14 @@
   
   // inline
   const inlineElem = literals
-    .or(value)
     .or(suporsub)
     .or(environ)
     .or(unaryMacro)
     .or(binaryMacro)
+    .or(value)
+  
   const inlineCluster = typeface
-    .or(fixedMacro)
+    // .or(fixedMacro)
     .or(inlineElem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
     .plus()
   const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('$')
