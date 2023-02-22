@@ -1111,7 +1111,7 @@
   
     /* exp */
     sumtop: '⎲', 
-    sumtop: '⎳', 
+    sumbottom: '⎳', 
     lbraceuend: '⎧', 
     lbracemid: '⎨', 
     lbracelend: '⎩', 
