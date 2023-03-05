@@ -1111,7 +1111,7 @@
   
     /* exp */
     sumtop: '⎲', 
-    sumtop: '⎳', 
+    sumbottom: '⎳', 
     lbraceuend: '⎧', 
     lbracemid: '⎨', 
     lbracelend: '⎩', 
@@ -1692,9 +1692,11 @@
     .or(binaryMacro)
     .or(value)
   
+  const italicRender = s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')
+  
   const inlineCluster = typeface
     // .or(fixedMacro)
-    .or(inlineElem.map(s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')))
+    .or(inlineElem.map(italicRender))
     .plus()
   const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('$')
   const inlineMath = dollar.move(inlineCluster).skip(dollar)
@@ -1715,7 +1717,7 @@
     .follow(blockValue)
     .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[xs[0][0]](xs[0][1], xs[1]))
   
-  const blockElem = blockInfix
+  const blockElem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(blockInfix)
     .or(blockValue) // csp. value
     .or(suporsub.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
     .or(fixedMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
