@@ -342,16 +342,24 @@
       if (x == _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].Delta && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].deltaeq
       return `\\overset\{${x}\}\{${y}\}`
     }, 
+    binom: (n, k) => `(${n} ${k})`, 
   
     __block__: {
       frac: (x, y) => _utils_block_js__WEBPACK_IMPORTED_MODULE_0__["default"].frac(x, y), 
       overset: (x, y) => Binary.overset(x.string, y.string).toBlock()
+    }, 
+  
+    __infix__: {
+      choose: (n, k) => Binary.binom(n, k)
     }
   }
   
   Binary['cfrac'] = Binary.frac
   Binary['dfrac'] = Binary.frac
   Binary['tfrac'] = Binary.frac
+  
+  Binary['dbinom'] = Binary.binom
+  Binary['tbinom'] = Binary.binom
   
   Binary.__block__['cfrac'] = Binary.__block__.frac
   Binary.__block__['dfrac'] = Binary.__block__.frac
@@ -1655,6 +1663,13 @@
     .follow(value)
     .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
   
+  // [[value1, macro], value2]
+  const infixMacro = value
+    .follow(macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__infix__[x]))
+    .follow(value)
+    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][1]](xs[0][0], xs[1]))
+  
+  
   const envira = braceWrap(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters)
   const begin = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('begin')).move(envira)
   const end = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('end')).move(envira)
@@ -1684,8 +1699,10 @@
   
   //
   
+  
   // inline
   const inlineElem = literals
+    // .or(infixMacro)
     .or(suporsub)
     .or(environ)
     .or(unaryMacro)
@@ -1760,7 +1777,6 @@
   const UniTeX = {
     parse: s => (x => x ? x[0] : '')(text.parse(s))
   }
-  
   
   })();
   
