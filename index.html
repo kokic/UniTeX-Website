@@ -5,7 +5,16 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"
+    integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <script src="https://codemirror.net/codemirror.js"></script>
+
   <script src="./dist/unitex.js"></script>
+  <script src="./dist/stex.js"></script>
+
   <title>UniTeX demo</title>
   <style>
     @font-face {
@@ -30,10 +39,6 @@
       font-family: UbuntuMono;
     }
 
-    #leftside {
-      display: inline-block;
-    }
-
     textarea {
       outline: none;
       border: 2px solid;
@@ -42,7 +47,7 @@
       font-family: monospace;
     }
 
-    #copy-unicode {
+    .copy-unicode {
       font-size: 1.25em;
       text-align: right;
       user-select: none;
@@ -87,10 +92,7 @@
 </head>
 
 <body>
-  <div id="leftside">
-    <textarea id="tex-area"></textarea>
-    <div id="copy-unicode">copy</div>
-  </div>
+  <div id="leftside"></div>
   <pre id="unicode-board"></pre>
   <a class="vert-top" href="https://github.com/kokic/UniTeX">[ Github ]</a>
 
@@ -105,33 +107,48 @@
 
   <script>
 
-    const handleQuery = function (name, value) {
-      switch (name) {
-        case 'tex':
-          elemTeXArea.value = value
-          updateUnicodeBoard()
-          break
-      }
-    }
-
-    const handleQueries = xs => xs
-      .map(x => x.split('='))
-      .forEach(x => handleQuery(x[0], x[1]))
-
-    const updateUnicodeBoard = function () {
-      elemUnicodeBoard.innerText = UniTeX.parse(elemTeXArea.value)
-    }
+    const { basicSetup } = CM["codemirror"];
+    const { EditorView, keymap } = CM["@codemirror/view"];
+    const { EditorState } = CM["@codemirror/state"];
+    const { StreamLanguage } = CM["@codemirror/language"];
 
     const createElement = name => document.createElement(name)
 
-    const elemTeXArea = document.getElementById('tex-area')
-    const copyUnicode = document.getElementById('copy-unicode')
+    const elemLeftside = document.getElementById('leftside')
+
+    const queriesData = {}
+    const search = decodeURI(window.location.search)
+    search && search.substring(1).split('&')
+      .map(x => x.split('='))
+      .forEach(x => queriesData[x[0]] = x[1])
+
+    const editorView = new EditorView({
+      doc: queriesData['tex'] || '\n'.repeat(2),
+      extensions: [
+        basicSetup,
+        StreamLanguage.define(stexMath),
+        EditorView.updateListener.of(viewUpdate => {
+          viewUpdate.docChanged && updateUnicodeBoard()
+        })],
+      parent: elemLeftside
+    })
+
     const elemUnicodeBoard = document.getElementById('unicode-board')
 
-    const copiesBridge = createElement('input')
+    const updateUnicodeBoard = function () {
+      const s = editorView.state.doc.toString()
+      elemUnicodeBoard.innerText = UniTeX.parse(s)
+    }
+    updateUnicodeBoard()
 
-    const search = decodeURI(window.location.search)
-    search && handleQueries(search.substring(1).split('&'))
+    const copyUnicode = createElement('div')
+    copyUnicode.innerText = 'copy'
+    copyUnicode.className = 'copy-unicode'
+    elemLeftside.appendChild(copyUnicode)
+
+
+
+    const copiesBridge = createElement('input')
 
     copyUnicode.addEventListener('click', function () {
       copiesBridge.value = elemUnicodeBoard.innerText
@@ -140,13 +157,6 @@
       document.execCommand('copy')
       leftside.removeChild(copiesBridge)
     })
-
-    elemTeXArea.addEventListener('input', updateUnicodeBoard)
-
-    const width = document.body.clientWidth
-    const columns = Math.round(width / 25 + 15)
-    elemTeXArea.cols = [] + columns
-    elemTeXArea.rows = [] + columns / 4
 
     const baseTypeface = 'serif, sans-serif'
     const elemOutputTypeface = document.getElementById('output-typeface')
