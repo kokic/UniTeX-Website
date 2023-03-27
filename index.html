@@ -138,7 +138,7 @@
       .forEach(x => queriesData[x[0]] = x[1])
 
     const editorView = new EditorView({
-      doc: queriesData['tex'] || '\n'.repeat(2),
+      doc: queriesData['tex'] || '' /* '\n'.repeat(2) // only for test */,
       extensions: [
         basicSetup,
         StreamLanguage.define(stexMath),
