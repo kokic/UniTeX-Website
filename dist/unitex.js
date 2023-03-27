@@ -282,10 +282,12 @@
   
     this.check = (predicate = defined) => this.next = new Link((...xs) =>
       (x => x.y ? x.x : (this.next.suspend(), undefined))
+        // eslint-disable-next-line no-unexpected-multiline
         (point(this.run(...xs), this.transphism(predicate))))
   
     this.pip = next => this.next = new Link((...xs) =>
       (x => defined(x.y) ? [x.x, x.y] : (this.next.suspend(), undefined))
+        // eslint-disable-next-line no-unexpected-multiline
         (point(this.run(...xs), this.transphism(next.run))))
   
     this.map = morph => this.next = new Link((...xs) =>
@@ -340,7 +342,7 @@
       if (x == 'def' && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].defeq
       if (x == _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].star && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].stareq
       if (x == _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].Delta && y == '=') return _fixed_js__WEBPACK_IMPORTED_MODULE_2__["default"].deltaeq
-      return `\\overset\{${x}\}\{${y}\}`
+      return `\\overset{${x}}{${y}}`
     }, 
     binom: (n, k) => `(${n} ${k})`, 
   
@@ -614,7 +616,6 @@
   
     cdot: '⋅',
     cdotp: '⋅',
-    circ: '∘',
   
     dots: '…',
     cdots: '⋯',
@@ -659,7 +660,7 @@
     bigoplus: '⨁',
     bigwedge: '⋀',
     bigodot: '⨀',
-    bigcup: '⋂',
+    bigcap: '⋂',
     biguplus: '⨄',
     bigcup: '⋃',
     bigsqcup: '⨆',
@@ -769,7 +770,6 @@
     wedgeq: '≙', // fcitx & ibus
     veeeq: '≚', // fcitx & ibus
     circeq: '≗', // fcitx & ibus
-    smile: '⌣',
   
     /* Relations */
     doteqdot: '≑',
@@ -812,7 +812,7 @@
     subseteqq: '⫅',
     backepsilon: '∍',
     equiv: '≡',
-    mid: '∣',
+    // mid: '∣', 
     succ: '≻',
     backsim: '∽',
     fallingdotseq: '≒',
@@ -832,13 +832,13 @@
     succsim: '≿',
     bumpeq: '≏',
     geqq: '≧',
-    parallel: '∥',
+    // parallel: '∥',
     Supset: '⋑',
     Bumpeq: '≎',
     geqslant: '⩾',
     perp: '⊥',
     supset: '⊃',
-    circeq: '≗',
+    // circeq: '≗',
     gg: '≫',
     pitchfork: '⋔',
     supseteq: '⊇',
@@ -866,7 +866,7 @@
     colonequals: '≔',
     gtreqless: '⋛',
     precsim: '≾',
-    triangleq: '≜',
+    // triangleq: '≜',
     Coloneqq: '∷=',
     coloncolonequals: '∷=',
     gtreqqless: '⪌',
@@ -938,7 +938,7 @@
     nsupseteqq: '⊉',
     succneqq: '⪶',
     lneq: '⪇',
-    nmid: '∤',
+    // nmid: '∤',
     ntriangleleft: '⋪',
     succnsim: '⋩',
     lneqq: '≨',
@@ -950,7 +950,7 @@
     ntriangleright: '⋫',
     supsetneqq: '⫌',
     lvertneqq: '≨',
-    nparallel: '∦',
+    // nparallel: '∦',
     ntrianglerighteq: '⋭',
     varsubsetneq: '⊊',
     ncong: '≆',
@@ -960,7 +960,7 @@
     npreceq: '⋠',
     nvDash: '⊭',
     varsupsetneq: '⊋',
-    neq: '≠',
+    // neq: '≠',
     nshortmid: '∤',
     nVDash: '⊯',
     varsupsetneqq: '⫌',
@@ -1167,8 +1167,8 @@
   _utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subscripts[Fixed.ni] = Fixed.smallni
   
   
-  
   // Gothic
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const gothics = ['ahsa', 'bairkan', 'giba', 'dags', 'aihvus']
   
   
@@ -1298,7 +1298,7 @@
   const polymerizeTeX = function (s) {
     let result = s.trim()
       .replace(/ *\r\n *| *\n *| (?= )/g, '')
-      .replace(/ *(\,|\.) */g, '$1 ')
+      .replace(/ *(,|\.) */g, '$1 ')
     return result
   }
   
@@ -1342,7 +1342,6 @@
   
   
   
-  
   // Parse<A>.parse: String -> [A, String]
   const Parser = function (parse) {
     this.parse = parse
@@ -1354,6 +1353,7 @@
   Parser.prototype.many = function () {
     return new Parser(source => {
       let [list, residue, tuple] = [[], source]
+      // eslint-disable-next-line no-cond-assign
       while (tuple = this.parse(residue)) {
         list.push(tuple[0])
         residue = tuple[1]
@@ -1372,6 +1372,7 @@
   Parser.prototype.asterisk = function () {
     return new Parser(source => {
       let [buffer, residue, tuple] = ['', source,]
+      // eslint-disable-next-line no-cond-assign
       while (tuple = this.parse(residue)) {
         buffer += tuple[0]
         residue = tuple[1]
@@ -1639,8 +1640,8 @@
   const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:!()[]{}_%\\')
   
   const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters.or(symbolMacros)
-  
   const macroh = backslash.move(macroName)
+  
   const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x] != undefined)
     .map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
   
@@ -1664,6 +1665,7 @@
     .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
   
   // [[value1, macro], value2]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const infixMacro = value
     .follow(macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__infix__[x]))
     .follow(value)
@@ -1740,7 +1742,7 @@
     .or(fixedMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
     .or(unaryMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
     .or(blockBinaryMacro) // csp. binary
-    .or((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !solid(x)).some().map(x => _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].empty))
+    .or((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !solid(x)).some().map(() => _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].empty))
   
   const blockCluster = blockElem.some()
     .map(x => x.reduce((s, t) => s.append(t)))
@@ -1775,7 +1777,8 @@
   const text = spectrum.plus()
   
   const UniTeX = {
-    parse: s => (x => x ? x[0] : '')(text.parse(s))
+    parse: s => (x => x ? x[0] : '')(text.parse(s)), 
+    fixeds: () => Object.keys(_src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"]), 
   }
   
   })();

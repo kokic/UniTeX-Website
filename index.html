@@ -107,10 +107,27 @@
 
   <script>
 
-    const { basicSetup } = CM["codemirror"];
-    const { EditorView, keymap } = CM["@codemirror/view"];
-    const { EditorState } = CM["@codemirror/state"];
-    const { StreamLanguage } = CM["@codemirror/language"];
+    const { basicSetup } = CM["codemirror"]
+    const { EditorView, keymap } = CM["@codemirror/view"]
+    const { EditorState } = CM["@codemirror/state"]
+
+    const { StreamLanguage } = CM["@codemirror/language"]
+    const { autocompletion } = CM["@codemirror/autocomplete"];
+
+    const supplyKeywordOptions = () => UniTeX.fixeds()
+      .filter(x => /[A-Za-z]+/.test(x))
+      .map(x => ({ label: `\\${x}`, type: 'keyword' }))
+
+    function supplyUniTeXCompletions(context) {
+      let token = context.matchBefore(/\\[A-Za-z]*/)
+      if (token.from == token.to && !context.explicit)
+        return null
+      return {
+        from: token.from,
+        options: supplyKeywordOptions()
+      }
+    }
+
 
     const createElement = name => document.createElement(name)
 
@@ -127,9 +144,9 @@
       extensions: [
         basicSetup,
         StreamLanguage.define(stexMath),
-        EditorView.updateListener.of(viewUpdate => {
-          viewUpdate.docChanged && updateUnicodeBoard()
-        })],
+        EditorView.updateListener.of(x => x.docChanged && updateUnicodeBoard()),
+        autocompletion({ override: [supplyUniTeXCompletions] }),
+      ],
       parent: elemLeftside
     })
 
