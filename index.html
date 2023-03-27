@@ -46,6 +46,8 @@
     .copy-unicode {
       font-size: 1.25em;
       text-align: right;
+      margin-top: 0.25em;
+      margin-right: 0.5em;
       user-select: none;
       -moz-user-select: none;
       -webkit-user-select: none;
@@ -159,9 +161,7 @@
     copyUnicode.className = 'copy-unicode'
     elemLeftside.appendChild(copyUnicode)
 
-
-
-    const copiesBridge = createElement('input')
+    const copiesBridge = createElement('textarea')
 
     copyUnicode.addEventListener('click', function () {
       copiesBridge.value = elemUnicodeBoard.innerText
@@ -177,6 +177,8 @@
       const value = elemOutputTypeface.value + ', ' + baseTypeface
       elemUnicodeBoard.style.fontFamily = value
     })
+
+    
 
   </script>
 </body>
