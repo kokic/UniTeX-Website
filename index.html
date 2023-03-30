@@ -5,13 +5,15 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono">
+
   <script src="https://codemirror.net/codemirror.js"></script>
 
   <script src="./dist/unitex.js"></script>
   <script src="./dist/legacy-modes-stex/stex.js"></script>
 
-  <title>UniTeX demo</title>
+  <title>UniTeX</title>
   <style>
     @font-face {
       font-family: "LatinModern-Math";
@@ -33,19 +35,35 @@
 
     body {
       font-family: UbuntuMono;
+      font-size: 18px;
+      /* padding: 5% 20%; */
     }
 
-    textarea {
+    /* 
+    .editor {
       outline: none;
       border: 2px solid;
       border-radius: 4px;
-      font-size: 1.25em;
+      font-size: 20px;
       font-family: monospace;
+    } 
+    */
+
+    /* .cm-editor {
+      font-size: 18px;
+    } */
+
+    .cm-gutters,
+    .cm-content {
+      border: 0px;
+      font-family: "JetBrains Mono";
     }
 
     .copy-unicode {
-      font-size: 1.25em;
+      font-size: 20px;
+      font-family: "JetBrains Mono";
       text-align: right;
+      cursor: pointer;
       margin-top: 0.25em;
       margin-right: 0.5em;
       user-select: none;
@@ -77,19 +95,43 @@
       vertical-align: top;
     }
 
-    pre {
-      font-size: 1.25em;
+    #typeface-set {
+      margin: 5px 0px;
+    }
+
+    #unicode-board {
+      /* overflow-x: scroll; */
+      font-size: 18px;
       font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
     }
 
-    #typeface-set {
-      margin: 5px 0px;
+    @media screen and (max-width: 900px) {
+      /* .cm-editor {
+        font-size: 16px;
+      }
+
+      #unicode-board {
+        font-size: 16px;
+      } */
+
+      body {
+        font-size: 16px;
+      }
+
+      .copy-unicode {
+        font-size: 18px;
+      }
+
     }
   </style>
 
 </head>
 
 <body>
+  <div id="header">
+
+  </div>
+
   <div id="leftside"></div>
   <pre id="unicode-board"></pre>
   <a class="vert-top" href="https://github.com/kokic/UniTeX">[ Github ]</a>
@@ -178,7 +220,7 @@
       elemUnicodeBoard.style.fontFamily = value
     })
 
-    
+
 
   </script>
 </body>
