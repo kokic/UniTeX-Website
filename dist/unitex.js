@@ -100,6 +100,20 @@
   typeface('textscr', Unicode.typeface.mathscr) // original
   typeface('textcal', Unicode.typeface.mathcal) // original
   
+  typeface('sf', Unicode.typeface.mathsf)
+  typeface('bf', Unicode.typeface.mathbf)
+  typeface('bold', Unicode.typeface.mathbf)
+  
+  typeface('boldsymbol', Unicode.typeface.mathbf)
+  typeface('bm', Unicode.typeface.mathbf)
+  
+  typeface('tt', Unicode.typeface.texttt)
+  typeface('it', Unicode.typeface.mathit)
+  
+  typeface('frak', Unicode.typeface.mathfrak)
+  typeface('cal', Unicode.typeface.mathcal)
+  
+  typeface('Bbb', Unicode.typeface.mathbb)
   // typeface('text', alphabets(...series('A', 'Z'), ...series('a', 'z')))
   
   Unicode.typefaceNames = Object.keys(Unicode.typeface)
@@ -1779,6 +1793,8 @@
   const UniTeX = {
     parse: s => (x => x ? x[0] : '')(text.parse(s)), 
     fixeds: () => Object.keys(_src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"]), 
+    unaries: () => Object.keys(_src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"]), 
+    binaries: () => Object.keys(_src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"]), 
   }
   
   })();
