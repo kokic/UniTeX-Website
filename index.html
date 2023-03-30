@@ -101,7 +101,7 @@
 
     #unicode-board {
       /* overflow-x: scroll; */
-      font-size: 18px;
+      font-size: 20px;
       font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
     }
 
@@ -119,6 +119,10 @@
       }
 
       .copy-unicode {
+        font-size: 18px;
+      }
+
+      #unicode-board {
         font-size: 18px;
       }
 
@@ -152,11 +156,19 @@
     const { EditorState } = CM["@codemirror/state"]
 
     const { StreamLanguage } = CM["@codemirror/language"]
-    const { autocompletion } = CM["@codemirror/autocomplete"];
+    const { autocompletion, snippetCompletion } = CM["@codemirror/autocomplete"];
 
-    const supplyKeywordOptions = () => UniTeX.fixeds()
-      .filter(x => /[A-Za-z]+/.test(x))
-      .map(x => ({ label: `\\${x}`, type: 'keyword' }))
+    const ofLetters = xs => xs.filter(x => /^[A-Za-z]+$/.test(x))
+
+    const supplyKeywordOptions = function () {
+      const fixed = ofLetters(UniTeX.fixeds())
+        .map(x => ({ label: `\\${x}`, type: 'keyword' }))
+      const unary = ofLetters(UniTeX.unaries())
+        .map(x => snippetCompletion(`\\${x}{\${}}`, { label: `\\${x}{}`, type: 'keyword' }))
+      const binary = ofLetters(UniTeX.binaries())
+        .map(x => snippetCompletion(`\\${x}{\${}}{\${}}`, { label: `\\${x}{}{}`, type: 'keyword' }))
+      return fixed.concat(unary).concat(binary)
+    }
 
     function supplyUniTeXCompletions(context) {
       let token = context.matchBefore(/\\[A-Za-z]*/)
@@ -164,7 +176,7 @@
         return null
       return {
         from: token.from,
-        options: supplyKeywordOptions()
+        options: supplyKeywordOptions(),
       }
     }
 
