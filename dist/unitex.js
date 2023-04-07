@@ -1212,11 +1212,33 @@
     cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
     furt: x => '∜' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
   
+    grave: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0300' : '-grave'),
+    '`': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0300' : ''),
+  
+    acute: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0301' : '-acute'),
+    '\'': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0301' : ''),
+    
     hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : '-hat'),
+    '^': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : ''),
+    
     tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : '-tilde'),
+    '~': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : ''),
+  
     bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'),
+    '=': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : ''),
+    
     overline: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0305' : '-underline'),
     breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : '-breve'),
+    u: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : ''),
+  
+    '.': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0307' : ''),
+    '"': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0308' : ''),
+    
+    
+    r: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u030A' : ''),
+    H: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u030B' : ''),
+    v: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u030C' : ''),
+  
   
     kern: x => x.endsWith('em') ? ' '.repeat(x.substring(0, x.length - 2)) : ' ',
   
@@ -1651,7 +1673,7 @@
   const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single.or(braceWrap(() => text)))
   const optional = bracketWrap(value) // [value]
   
-  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:!()[]{}_%\\')
+  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:!()[]{}_%\\`^~=."\'')
   
   const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters.or(symbolMacros)
   const macroh = backslash.move(macroName)
