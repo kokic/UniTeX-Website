@@ -175,7 +175,7 @@
     }
 
     a {
-      color: rgb(56, 56, 56, 0.5);
+      color: rgba(56, 56, 56, 0.5);
       text-decoration: none;
       background-position: bottom;
       background-size: 100% 0.35em;
@@ -317,11 +317,16 @@
 
     const theme = EditorView.theme({
       ".cm-content": {
-        fontFamily: "JetBrains Mono", 
+        fontFamily: "JetBrains Mono",
       },
       "&.cm-focused": {
-        outline: "none", 
+        outline: "none",
       },
+      ".cm-gutters": {
+        backgroundColor: 'transparent',
+        color: "#ccc",
+        border: "none", 
+      }
     })
 
     const editorView = new EditorView({
