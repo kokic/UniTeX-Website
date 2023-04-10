@@ -1673,7 +1673,7 @@
   const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single.or(braceWrap(() => text)))
   const optional = bracketWrap(value) // [value]
   
-  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:!()[]{}_%\\`^~=."\'')
+  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:;!()[]{}_%\\`^~=."\'')
   
   const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters.or(symbolMacros)
   const macroh = backslash.move(macroName)
