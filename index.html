@@ -172,6 +172,7 @@
 
     label {
       font-size: 1.2rem;
+      user-select: none;
     }
 
     a {
@@ -202,6 +203,10 @@
       /* overflow-x: scroll; */
       font-size: 20px;
       font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
+    }
+
+    .optional {
+      display: inline;
     }
 
     @media screen and (max-width: 900px) {
@@ -252,9 +257,14 @@
     <div id="leftside">edit or paste</div>
     <pre id="unicode-board"></pre>
 
-    <div id="copy-trim">
+    <div id="copy-trim" class="optional">
       <input type="checkbox" id="copy-trim-box">
-      <label for="copy-trim-box">copy trim</label>
+      <label for="copy-trim-box">trim</label>
+    </div>
+
+    <div id="copy-minify" class="optional">
+      <input type="checkbox" id="copy-minify-box">
+      <label for="copy-minify-box">minify</label>
     </div>
 
     <div id="typeface-set">
@@ -325,7 +335,7 @@
       ".cm-gutters": {
         backgroundColor: 'transparent',
         color: "#ccc",
-        border: "none", 
+        border: "none",
       }
     })
 
@@ -366,13 +376,24 @@
       leftside.removeChild(copiesBridge)
     }
 
-    const elemCopyTrimBox = document.getElementById('copy-trim-box')
+    const copiesMappers = {
+      'copy-trim-box': s => s.trim(),
+      'copy-minify-box': s => s.replace(/\n/g, '')
+    }
+
+    const chainSynthesis = function () {
+      const chain = [];
+      [...document.getElementsByClassName('optional')]
+        .map(x => document.getElementById(x.id + '-box'))
+        .forEach(x => x.checked && (chain.push(copiesMappers[x.id])))
+      return chain
+    }
+
 
     copyUnicode.addEventListener('click', function () {
       showSnackbar('copied')
-      copiesBridge.value = elemCopyTrimBox.checked
-        ? elemUnicodeBoard.innerText.trim()
-        : elemUnicodeBoard.innerText
+      copiesBridge.value = chainSynthesis()
+        .reduce((f, g) => g(f), elemUnicodeBoard.innerText)
       copiesExec()
     })
 
