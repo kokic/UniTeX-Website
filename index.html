@@ -144,7 +144,8 @@
       outline: none;
     } */
 
-    .copy-unicode {
+    .right-operate {
+      margin-left: 2rem;
       margin-right: 2rem;
       font-size: 1.2rem;
       font-family: "JetBrains Mono";
@@ -160,12 +161,12 @@
 
 
 
-    .copy-unicode:hover {
+    .right-operate:hover {
       /* color: #ff8ac1; */
       transform: scale(1.1);
     }
 
-    .copy-unicode:active {
+    .right-operate:active {
       color: #ff69b4;
       transform: scale(0.9);
     }
@@ -279,7 +280,7 @@
   </div>
 
   <div id="footer">
-    
+
     Created by <a class="vert-top" href="https://github.com/kokic" target="_blank">kokic</a> |
     <a class="vert-top" href="https://github.com/kokic/UniTeX/blob/main/LICENSE" target="_blank">MIT License</a> |
     <a class="vert-top" href="https://github.com/kokic/UniTeX" target="_blank">Github</a>
@@ -319,6 +320,10 @@
 
 
     const createElement = name => document.createElement(name)
+
+    Element.prototype.bindParent = function (parent) {
+      parent.appendChild(this)
+    }
 
     const elemLeftside = document.getElementById('leftside')
 
@@ -367,10 +372,12 @@
     }
     updateUnicodeBoard()
 
+
+
     const copyUnicode = createElement('div')
     copyUnicode.innerText = 'copy'
-    copyUnicode.className = 'copy-unicode'
-    elemLeftside.appendChild(copyUnicode)
+    copyUnicode.className = 'right-operate'
+    copyUnicode.bindParent(elemLeftside)
 
     const copiesBridge = createElement('textarea')
     const copiesExec = function () {
@@ -388,7 +395,7 @@
     const chainSynthesis = function () {
       const chain = [];
       [...document.getElementsByClassName('optional')]
-        .map(x => document.getElementById(x.id + '-box'))
+        .map(x => document.getElementById(`${x.id}-box`))
         .forEach(x => x.checked && (chain.push(copiesMappers[x.id])))
       return chain
     }
@@ -401,6 +408,23 @@
       copiesExec()
     })
 
+
+
+    const clearEditor = createElement('div')
+    clearEditor.innerText = 'clear'
+    clearEditor.className = 'right-operate'
+    clearEditor.bindParent(elemLeftside)
+
+
+    clearEditor.addEventListener('click', function () {
+      const length = editorView.state.doc.length
+      editorView.dispatch({
+        changes: { from: 0, to: length, insert: '' }
+      });
+    })
+
+
+
     const baseTypeface = 'serif, sans-serif'
     const elemOutputTypeface = document.getElementById('output-typeface')
     elemOutputTypeface.addEventListener('click', function () {
@@ -409,11 +433,11 @@
     })
 
     const snackbar = document.getElementById("snackbar");
-    const snackbarUpdate = (s, r) => snackbar.className = snackbar.className.replace(s, r);
+    const snackbarUpdate = (s, t) => (snackbar.classList.remove(s), snackbar.classList.add(t));
     const showSnackbar = function (message) {
       if (getComputedStyle(snackbar).visibility == 'hidden') {
         snackbar.innerText = message;
-        snackbar.className += "show";
+        snackbar.classList.add('show')
         setTimeout(() => snackbarUpdate('show', 'hide'), 1200);
         setTimeout(() => snackbarUpdate('hide', ''), 1500);
       }
