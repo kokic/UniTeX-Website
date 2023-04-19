@@ -145,14 +145,13 @@
     } */
 
     .right-operate {
-      margin-left: 2rem;
-      margin-right: 2rem;
+      margin-top: 0.25em;
+      margin-left: 1rem;
+      margin-right: 0.25rem;
       font-size: 1.2rem;
       font-family: "JetBrains Mono";
       text-align: right;
       cursor: pointer;
-      margin-top: 0.25em;
-      margin-right: 0.5em;
       float: right;
       user-select: none;
       -moz-user-select: none;
@@ -185,6 +184,8 @@
       -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     }
 
+    
+
     a:hover {
       color: #d480aa;
       background-image: linear-gradient(transparent, transparent 4px, #d480aa 4px, #d480aa);
@@ -204,6 +205,10 @@
       /* overflow-x: scroll; */
       font-size: 20px;
       font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
+    }
+
+    #optionals {
+      margin: 1rem 0;
     }
 
     .optional {
@@ -235,6 +240,9 @@
 
 
     }
+
+    
+
   </style>
 
 </head>
@@ -257,15 +265,18 @@
 
     <div id="leftside">edit or paste</div>
     <pre id="unicode-board"></pre>
+    
 
-    <div id="copy-trim" class="optional">
-      <input type="checkbox" id="copy-trim-box">
-      <label for="copy-trim-box">trim</label>
-    </div>
-
-    <div id="copy-minify" class="optional">
-      <input type="checkbox" id="copy-minify-box">
-      <label for="copy-minify-box">minify</label>
+    <div id="optionals">
+      <div id="copy-trim" class="optional">
+        <input type="checkbox" id="copy-trim-box">
+        <label for="copy-trim-box">trim</label>
+      </div>
+  
+      <div id="copy-minify" class="optional">
+        <input type="checkbox" id="copy-minify-box">
+        <label for="copy-minify-box">minify</label>
+      </div>  
     </div>
 
     <div id="typeface-set">
@@ -373,11 +384,19 @@
     updateUnicodeBoard()
 
 
+    const rightOperates = createElement('div')
+    rightOperates.bindParent(elemLeftside)
 
     const copyUnicode = createElement('div')
     copyUnicode.innerText = 'copy'
     copyUnicode.className = 'right-operate'
-    copyUnicode.bindParent(elemLeftside)
+    copyUnicode.bindParent(rightOperates)
+    copyUnicode.addEventListener('click', function () {
+      showSnackbar('copied')
+      copiesBridge.value = chainSynthesis()
+        .reduce((f, g) => g(f), elemUnicodeBoard.innerText)
+      copiesExec()
+    })
 
     const copiesBridge = createElement('textarea')
     const copiesExec = function () {
@@ -399,23 +418,14 @@
         .forEach(x => x.checked && (chain.push(copiesMappers[x.id])))
       return chain
     }
-
-
-    copyUnicode.addEventListener('click', function () {
-      showSnackbar('copied')
-      copiesBridge.value = chainSynthesis()
-        .reduce((f, g) => g(f), elemUnicodeBoard.innerText)
-      copiesExec()
-    })
+    
 
 
 
     const clearEditor = createElement('div')
     clearEditor.innerText = 'clear'
     clearEditor.className = 'right-operate'
-    clearEditor.bindParent(elemLeftside)
-
-
+    clearEditor.bindParent(rightOperates)
     clearEditor.addEventListener('click', function () {
       const length = editorView.state.doc.length
       editorView.dispatch({
