@@ -430,7 +430,7 @@
       const length = editorView.state.doc.length
       editorView.dispatch({
         changes: { from: 0, to: length, insert: '' }
-      });
+      })
     })
 
 
@@ -449,7 +449,7 @@
         snackbar.innerText = message;
         snackbar.classList.add('show')
         setTimeout(() => snackbarUpdate('show', 'hide'), 1200);
-        setTimeout(() => snackbarUpdate('hide', ''), 1500);
+        setTimeout(() => snackbar.classList.remove('hide'), 1500);
       }
     }
 
