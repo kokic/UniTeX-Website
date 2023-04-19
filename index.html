@@ -144,14 +144,14 @@
       outline: none;
     } */
 
-    .copy-unicode {
-      margin-right: 2rem;
+    .right-operate {
+      margin-top: 0.25em;
+      margin-left: 1rem;
+      margin-right: 0.25rem;
       font-size: 1.2rem;
       font-family: "JetBrains Mono";
       text-align: right;
       cursor: pointer;
-      margin-top: 0.25em;
-      margin-right: 0.5em;
       float: right;
       user-select: none;
       -moz-user-select: none;
@@ -160,18 +160,19 @@
 
 
 
-    .copy-unicode:hover {
+    .right-operate:hover {
       /* color: #ff8ac1; */
       transform: scale(1.1);
     }
 
-    .copy-unicode:active {
+    .right-operate:active {
       color: #ff69b4;
       transform: scale(0.9);
     }
 
     label {
       font-size: 1.2rem;
+      user-select: none;
     }
 
     a {
@@ -182,6 +183,8 @@
       background-repeat: repeat-x;
       -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     }
+
+    
 
     a:hover {
       color: #d480aa;
@@ -202,6 +205,14 @@
       /* overflow-x: scroll; */
       font-size: 20px;
       font-family: TexGyrePagella, LatinModern-Math, serif, sans-serif;
+    }
+
+    #optionals {
+      margin: 1rem 0;
+    }
+
+    .optional {
+      display: inline;
     }
 
     @media screen and (max-width: 900px) {
@@ -229,6 +240,9 @@
 
 
     }
+
+    
+
   </style>
 
 </head>
@@ -251,10 +265,18 @@
 
     <div id="leftside">edit or paste</div>
     <pre id="unicode-board"></pre>
+    
 
-    <div id="copy-trim">
-      <input type="checkbox" id="copy-trim-box">
-      <label for="copy-trim-box">copy trim</label>
+    <div id="optionals">
+      <div id="copy-trim" class="optional">
+        <input type="checkbox" id="copy-trim-box">
+        <label for="copy-trim-box">trim</label>
+      </div>
+  
+      <div id="copy-minify" class="optional">
+        <input type="checkbox" id="copy-minify-box">
+        <label for="copy-minify-box">minify</label>
+      </div>  
     </div>
 
     <div id="typeface-set">
@@ -269,7 +291,11 @@
   </div>
 
   <div id="footer">
-    <a class="vert-top" href="https://github.com/kokic/UniTeX" target="_blank">[ Github ]</a>
+
+    Created by <a class="vert-top" href="https://github.com/kokic" target="_blank">kokic</a> |
+    <a class="vert-top" href="https://github.com/kokic/UniTeX/blob/main/LICENSE" target="_blank">MIT License</a> |
+    <a class="vert-top" href="https://github.com/kokic/UniTeX" target="_blank">Github</a>
+
   </div>
 
   <script>
@@ -306,6 +332,10 @@
 
     const createElement = name => document.createElement(name)
 
+    Element.prototype.bindParent = function (parent) {
+      parent.appendChild(this)
+    }
+
     const elemLeftside = document.getElementById('leftside')
 
     const queriesData = {}
@@ -325,7 +355,7 @@
       ".cm-gutters": {
         backgroundColor: 'transparent',
         color: "#ccc",
-        border: "none", 
+        border: "none",
       }
     })
 
@@ -353,10 +383,20 @@
     }
     updateUnicodeBoard()
 
+
+    const rightOperates = createElement('div')
+    rightOperates.bindParent(elemLeftside)
+
     const copyUnicode = createElement('div')
     copyUnicode.innerText = 'copy'
-    copyUnicode.className = 'copy-unicode'
-    elemLeftside.appendChild(copyUnicode)
+    copyUnicode.className = 'right-operate'
+    copyUnicode.bindParent(rightOperates)
+    copyUnicode.addEventListener('click', function () {
+      showSnackbar('copied')
+      copiesBridge.value = chainSynthesis()
+        .reduce((f, g) => g(f), elemUnicodeBoard.innerText)
+      copiesExec()
+    })
 
     const copiesBridge = createElement('textarea')
     const copiesExec = function () {
@@ -366,15 +406,34 @@
       leftside.removeChild(copiesBridge)
     }
 
-    const elemCopyTrimBox = document.getElementById('copy-trim-box')
+    const copiesMappers = {
+      'copy-trim-box': s => s.trim(),
+      'copy-minify-box': s => s.replace(/\n/g, '')
+    }
 
-    copyUnicode.addEventListener('click', function () {
-      showSnackbar('copied')
-      copiesBridge.value = elemCopyTrimBox.checked
-        ? elemUnicodeBoard.innerText.trim()
-        : elemUnicodeBoard.innerText
-      copiesExec()
+    const chainSynthesis = function () {
+      const chain = [];
+      [...document.getElementsByClassName('optional')]
+        .map(x => document.getElementById(`${x.id}-box`))
+        .forEach(x => x.checked && (chain.push(copiesMappers[x.id])))
+      return chain
+    }
+    
+
+
+
+    const clearEditor = createElement('div')
+    clearEditor.innerText = 'clear'
+    clearEditor.className = 'right-operate'
+    clearEditor.bindParent(rightOperates)
+    clearEditor.addEventListener('click', function () {
+      const length = editorView.state.doc.length
+      editorView.dispatch({
+        changes: { from: 0, to: length, insert: '' }
+      })
     })
+
+
 
     const baseTypeface = 'serif, sans-serif'
     const elemOutputTypeface = document.getElementById('output-typeface')
@@ -384,13 +443,13 @@
     })
 
     const snackbar = document.getElementById("snackbar");
-    const snackbarUpdate = (s, r) => snackbar.className = snackbar.className.replace(s, r);
+    const snackbarUpdate = (s, t) => (snackbar.classList.remove(s), snackbar.classList.add(t));
     const showSnackbar = function (message) {
       if (getComputedStyle(snackbar).visibility == 'hidden') {
         snackbar.innerText = message;
-        snackbar.className += "show";
+        snackbar.classList.add('show')
         setTimeout(() => snackbarUpdate('show', 'hide'), 1200);
-        setTimeout(() => snackbarUpdate('hide', ''), 1500);
+        setTimeout(() => snackbar.classList.remove('hide'), 1500);
       }
     }
 
