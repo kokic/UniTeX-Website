@@ -1,10 +1,209 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ([
-/* 0 */,
-/* 1 */
+/* 0 */
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "UniTeX": () => (/* binding */ UniTeX)
+  /* harmony export */ });
+  /* harmony import */ var _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+  /* harmony import */ var _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+  /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
+  /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
+  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(10);
+  /* harmony import */ var _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(5);
+  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(11);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  const backslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('\\')
+  
+  const lbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('{')
+  const rbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('}')
+  const braceWrap = x => lbrace.move(x).skip(rbrace)
+  
+  const lbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('[')
+  const rbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)(']')
+  const bracketWrap = x => lbracket.move(x).skip(rbracket)
+  
+  const special = x => '\\{}_^%$'.includes(x)
+  // const unit = digit.skip(string('em'))
+  
+  const literal = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !special(x))
+  const literals = literal.plus()
+  
+  const solid = x => x.trim().length == 1
+  const valuesymbol = literal.check(solid)
+  const single = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.digit.or(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letter).or(valuesymbol).or(() => fixedMacro)
+  const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single.or(braceWrap(() => text)))
+  const optional = bracketWrap(value) // [value]
+  
+  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:;!()[]{}_%\\`^~=."\'')
+  
+  const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters.or(symbolMacros)
+  const macroh = backslash.move(macroName)
+  
+  const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x] != undefined)
+    .map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
+  
+  // [macro, value]
+  const unaryOrdinaryMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x])
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
+  
+  // [[marco, optional], value]
+  const unaryOptionalMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[x])
+    .follow(optional)
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[xs[0][0]](xs[0][1], xs[1]))
+  
+  const unaryMacro = unaryOptionalMacro.or(unaryOrdinaryMacro)
+  
+  // [[macro, value1], value2]
+  const binaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][x])
+    .follow(value)
+    .follow(value)
+    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
+  
+  // [[value1, macro], value2]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const infixMacro = value
+    .follow(macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__infix__[x]))
+    .follow(value)
+    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][1]](xs[0][0], xs[1]))
+  
+  
+  const envira = braceWrap(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters)
+  const begin = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('begin')).move(envira)
+  const end = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('end')).move(envira)
+  // [[begin, text], end]
+  const environ = begin.follow(() => section).follow(end)
+    .check(xs => xs[0][0] == xs[1])
+    .map(xs => _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__["default"][xs[1]](xs[0][1]))
+  //
+  
+  
+  const supscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('^').move(value)
+    .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].suprender)
+  const subscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('_').move(value)
+    .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subrender)
+  const suporsub = supscript.or(subscript)
+  
+  const comment = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('%')
+    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => x != '\n').asterisk())
+    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('\n'))
+    .map(() => '')
+  //
+  
+  
+  const typeface = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.includes(x))
+    .follow(value)
+    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
+  
+  //
+  
+  
+  // inline
+  const inlineElem = literals
+    // .or(infixMacro)
+    .or(suporsub)
+    .or(environ)
+    .or(unaryMacro)
+    .or(binaryMacro)
+    .or(value)
+  
+  const italicRender = s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')
+  
+  const inlineCluster = typeface
+    // .or(fixedMacro)
+    .or(inlineElem.map(italicRender))
+    .plus()
+  const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('$')
+  const inlineMath = dollar.move(inlineCluster).skip(dollar)
+  
+  
+  
+  
+  // block
+  const blockInfix = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => '+-*/<>~'.includes(x))
+    .or(macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"].infixs.includes(x)).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]))
+    .map(x => ` ${x} `.toBlock())
+  
+  const blockValue = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single
+    .map(x => x.toBlock())
+    .or(braceWrap(() => blockCluster)))
+  const blockBinaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[x])
+    .follow(blockValue)
+    .follow(blockValue)
+    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[xs[0][0]](xs[0][1], xs[1]))
+  
+  const blockElem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(blockInfix)
+    .or(blockValue) // csp. value
+    .or(suporsub.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
+    .or(fixedMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
+    .or(unaryMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
+    .or(blockBinaryMacro) // csp. binary
+    .or((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !solid(x)).some().map(() => _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].empty))
+  
+  const blockCluster = blockElem.some()
+    .map(x => x.reduce((s, t) => s.append(t)))
+  
+  const doubleDollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('$$')
+  const blockMath = doubleDollar
+    .move(blockCluster.map(x => x.string))
+    .skip(doubleDollar)
+  //
+  
+  const mathstyle = blockMath.or(inlineMath)
+  
+  /** 
+   * because there is a simplified version of 
+   * the theorem style (as fixed macro), it is 
+   * necessary to ensure that the environment 
+   * takes precedence over those macros. 
+   *
+   */
+  const element = literals
+    .or(comment)
+    .or(mathstyle)
+    .or(inlineElem)
+  //
+  
+  const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('\\\\')
+  const section = doubleBackslash.or(element).plus()
+  
+  const unknownMacro = macroh.map(x => '\\' + x)
+  
+  const spectrum = element.or(unknownMacro)
+  const text = spectrum.plus()
+  
+  const UniTeX = {
+    parse: s => (x => x ? x[0] : '')(text.parse(s)), 
+    fixeds: () => Object.keys(_src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"]), 
+    unaries: () => Object.keys(_src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"]), 
+    binaries: () => Object.keys(_src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"]), 
+  
+    fixedMacros: _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"], 
+    unaryMacros: _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"], 
+    binaryMacros: _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"], 
+  }
+  
+  
+  
+  /***/ }),
+  /* 1 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
   __webpack_require__.r(__webpack_exports__);
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -1312,6 +1511,8 @@
   /* harmony import */ var _macro_fixed_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6);
   /* harmony import */ var _macro_unary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7);
   /* harmony import */ var _macro_binary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+  /* harmony import */ var _unitex_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(0);
+  
   
   
   
@@ -1366,10 +1567,13 @@
       overt: '\u036E', // original
       overx: '\u036F', // original
   
-    }, 
+    },
   
     binary: {
-      repeat: (s, n) => s.repeat(n)
+      repeat: (s, n) => s.repeat(n),
+      for: (s, n) => [...Array(parseInt(n)).keys()]
+        .map(x => _unitex_js__WEBPACK_IMPORTED_MODULE_3__.UniTeX.parse(s.replace(/#(\d+)/g, (__, n) => x + + n)))
+        .reduce((x, y) => x + y)
     }
   
   }
@@ -1751,204 +1955,14 @@
   /******/ 	})();
   /******/ 	
   /************************************************************************/
-  var __webpack_exports__ = {};
-  // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-  (() => {
-  __webpack_require__.r(__webpack_exports__);
-  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-  /* harmony export */   "UniTeX": () => (/* binding */ UniTeX)
-  /* harmony export */ });
-  /* harmony import */ var _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-  /* harmony import */ var _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
-  /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
-  /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
-  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(10);
-  /* harmony import */ var _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(5);
-  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(11);
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  const backslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('\\')
-  
-  const lbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('{')
-  const rbrace = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('}')
-  const braceWrap = x => lbrace.move(x).skip(rbrace)
-  
-  const lbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('[')
-  const rbracket = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)(']')
-  const bracketWrap = x => lbracket.move(x).skip(rbracket)
-  
-  const special = x => '\\{}_^%$'.includes(x)
-  // const unit = digit.skip(string('em'))
-  
-  const literal = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !special(x))
-  const literals = literal.plus()
-  
-  const solid = x => x.trim().length == 1
-  const valuesymbol = literal.check(solid)
-  const single = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.digit.or(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letter).or(valuesymbol).or(() => fixedMacro)
-  const value = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single.or(braceWrap(() => text)))
-  const optional = bracketWrap(value) // [value]
-  
-  const symbolMacros = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.includes)(...'|,>:;!()[]{}_%\\`^~=."\'')
-  
-  const macroName = _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters.or(symbolMacros)
-  const macroh = backslash.move(macroName)
-  
-  const fixedMacro = macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x] != undefined)
-    .map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x])
-  
-  // [macro, value]
-  const unaryOrdinaryMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x])
-    .follow(value)
-    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
-  
-  // [[marco, optional], value]
-  const unaryOptionalMacro = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[x])
-    .follow(optional)
-    .follow(value)
-    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].__optional__[xs[0][0]](xs[0][1], xs[1]))
-  
-  const unaryMacro = unaryOptionalMacro.or(unaryOrdinaryMacro)
-  
-  // [[macro, value1], value2]
-  const binaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][x])
-    .follow(value)
-    .follow(value)
-    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][0]](xs[0][1], xs[1]))
-  
-  // [[value1, macro], value2]
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const infixMacro = value
-    .follow(macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__infix__[x]))
-    .follow(value)
-    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"][xs[0][1]](xs[0][0], xs[1]))
-  
-  
-  const envira = braceWrap(_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.letters)
-  const begin = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('begin')).move(envira)
-  const end = backslash.skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('end')).move(envira)
-  // [[begin, text], end]
-  const environ = begin.follow(() => section).follow(end)
-    .check(xs => xs[0][0] == xs[1])
-    .map(xs => _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__["default"][xs[1]](xs[0][1]))
-  //
-  
-  
-  const supscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('^').move(value)
-    .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].suprender)
-  const subscript = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('_').move(value)
-    .map(_src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].subrender)
-  const suporsub = supscript.or(subscript)
-  
-  const comment = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('%')
-    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => x != '\n').asterisk())
-    .skip((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('\n'))
-    .map(() => '')
-  //
-  
-  
-  const typeface = macroh.check(x => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.includes(x))
-    .follow(value)
-    .map(xs => _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"][xs[0]](xs[1]))
-  
-  //
-  
-  
-  // inline
-  const inlineElem = literals
-    // .or(infixMacro)
-    .or(suporsub)
-    .or(environ)
-    .or(unaryMacro)
-    .or(binaryMacro)
-    .or(value)
-  
-  const italicRender = s => _src_utils_unicode_js__WEBPACK_IMPORTED_MODULE_0__["default"].render(s, 'mathit')
-  
-  const inlineCluster = typeface
-    // .or(fixedMacro)
-    .or(inlineElem.map(italicRender))
-    .plus()
-  const dollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.character)('$')
-  const inlineMath = dollar.move(inlineCluster).skip(dollar)
-  
-  
-  
-  
-  // block
-  const blockInfix = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => '+-*/<>~'.includes(x))
-    .or(macroh.check(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"].infixs.includes(x)).map(x => _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"][x]))
-    .map(x => ` ${x} `.toBlock())
-  
-  const blockValue = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(single
-    .map(x => x.toBlock())
-    .or(braceWrap(() => blockCluster)))
-  const blockBinaryMacro = macroh.check(x => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[x])
-    .follow(blockValue)
-    .follow(blockValue)
-    .map(xs => _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"].__block__[xs[0][0]](xs[0][1], xs[1]))
-  
-  const blockElem = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.loose)(blockInfix)
-    .or(blockValue) // csp. value
-    .or(suporsub.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
-    .or(fixedMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
-    .or(unaryMacro.map(_src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].of))
-    .or(blockBinaryMacro) // csp. binary
-    .or((0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.token)(x => !solid(x)).some().map(() => _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__["default"].empty))
-  
-  const blockCluster = blockElem.some()
-    .map(x => x.reduce((s, t) => s.append(t)))
-  
-  const doubleDollar = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('$$')
-  const blockMath = doubleDollar
-    .move(blockCluster.map(x => x.string))
-    .skip(doubleDollar)
-  //
-  
-  const mathstyle = blockMath.or(inlineMath)
-  
-  /** 
-   * because there is a simplified version of 
-   * the theorem style (as fixed macro), it is 
-   * necessary to ensure that the environment 
-   * takes precedence over those macros. 
-   *
-   */
-  const element = literals
-    .or(comment)
-    .or(mathstyle)
-    .or(inlineElem)
-  //
-  
-  const doubleBackslash = (0,_src_parsec_js__WEBPACK_IMPORTED_MODULE_6__.string)('\\\\')
-  const section = doubleBackslash.or(element).plus()
-  
-  const unknownMacro = macroh.map(x => '\\' + x)
-  
-  const spectrum = element.or(unknownMacro)
-  const text = spectrum.plus()
-  
-  const UniTeX = {
-    parse: s => (x => x ? x[0] : '')(text.parse(s)), 
-    fixeds: () => Object.keys(_src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"]), 
-    unaries: () => Object.keys(_src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"]), 
-    binaries: () => Object.keys(_src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"]), 
-  }
-  
-  
-  })();
-  
-  var __webpack_export_target__ = window;
-  for(var i in __webpack_exports__) __webpack_export_target__[i] = __webpack_exports__[i];
-  if(__webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, "__esModule", { value: true });
+  /******/ 	
+  /******/ 	// startup
+  /******/ 	// Load entry module and return exports
+  /******/ 	// This entry module is referenced by other modules so it can't be inlined
+  /******/ 	var __webpack_exports__ = __webpack_require__(0);
+  /******/ 	var __webpack_export_target__ = window;
+  /******/ 	for(var i in __webpack_exports__) __webpack_export_target__[i] = __webpack_exports__[i];
+  /******/ 	if(__webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, "__esModule", { value: true });
+  /******/ 	
   /******/ })()
   ;

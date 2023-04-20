@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono">
-
   <script src="https://codemirror.net/codemirror.js"></script>
 
   <script src="./dist/unitex.js"></script>
@@ -44,10 +43,15 @@
 
     #container {
       padding: 2rem 5rem;
-      background-color: #fff;
+    }
 
+    .day {
+      color: black;
+      background-color: #fff;
       box-shadow: rgba(0, 0, 0, 0.03) 0px 0px 10px 5px;
     }
+
+    /* .night {} */
 
     #footer {
       margin-top: 1rem;
@@ -184,7 +188,7 @@
       -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     }
 
-    
+
 
     a:hover {
       color: #d480aa;
@@ -240,9 +244,6 @@
 
 
     }
-
-    
-
   </style>
 
 </head>
@@ -250,7 +251,7 @@
 <body>
 
 
-  <div id="container">
+  <div id="container" class="day">
 
     <div id="header">
       <h2>UniTeX - a transpiler that converts TeX into Unicode</h2>
@@ -265,18 +266,18 @@
 
     <div id="leftside">edit or paste</div>
     <pre id="unicode-board"></pre>
-    
+
 
     <div id="optionals">
       <div id="copy-trim" class="optional">
         <input type="checkbox" id="copy-trim-box">
         <label for="copy-trim-box">trim</label>
       </div>
-  
+
       <div id="copy-minify" class="optional">
         <input type="checkbox" id="copy-minify-box">
         <label for="copy-minify-box">minify</label>
-      </div>  
+      </div>
     </div>
 
     <div id="typeface-set">
@@ -328,6 +329,9 @@
         options: supplyKeywordOptions(),
       }
     }
+
+    const container = document.getElementById('container');
+    (new Date().getHours() >= 18) && (container.classList.add('night'))
 
 
     const createElement = name => document.createElement(name)
@@ -418,7 +422,7 @@
         .forEach(x => x.checked && (chain.push(copiesMappers[x.id])))
       return chain
     }
-    
+
 
 
 
