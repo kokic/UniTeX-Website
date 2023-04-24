@@ -12,9 +12,12 @@
   /* harmony import */ var _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
   /* harmony import */ var _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
   /* harmony import */ var _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6);
-  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(10);
+  /* harmony import */ var _src_macro_environment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(8);
   /* harmony import */ var _src_utils_block_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(5);
-  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(11);
+  /* harmony import */ var _src_parsec_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(9);
+  /* harmony import */ var _src_context_context_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(10);
+  
+  
   
   
   
@@ -193,9 +196,7 @@
     unaries: () => Object.keys(_src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"]), 
     binaries: () => Object.keys(_src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"]), 
   
-    fixedMacros: _src_macro_fixed_js__WEBPACK_IMPORTED_MODULE_3__["default"], 
-    unaryMacros: _src_macro_unary_js__WEBPACK_IMPORTED_MODULE_2__["default"], 
-    binaryMacros: _src_macro_binary_js__WEBPACK_IMPORTED_MODULE_1__["default"], 
+    getContext: () => _src_context_context_js__WEBPACK_IMPORTED_MODULE_7__["default"].getContext(), 
   }
   
   
@@ -1380,10 +1381,8 @@
   /* harmony export */ __webpack_require__.d(__webpack_exports__, {
   /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
   /* harmony export */ });
-  /* harmony import */ var _context_context_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8);
-  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
-  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1);
-  
+  /* harmony import */ var _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
+  /* harmony import */ var _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
   
   
   
@@ -1393,36 +1392,36 @@
     text: x => x, 
     mathrm: x => x, 
   
-    sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(x),
-    cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(x), // original
-    furt: x => '∜' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_1__["default"].paren(x), // original
+    sqrt: x => '√' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x),
+    cbrt: x => '∛' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
+    furt: x => '∜' + _utils_proper_js__WEBPACK_IMPORTED_MODULE_0__["default"].paren(x), // original
   
-    grave: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0300' : '-grave'),
-    '`': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0300' : ''),
+    grave: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0300' : '-grave'),
+    '`': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0300' : ''),
   
-    acute: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0301' : '-acute'),
-    '\'': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0301' : ''),
+    acute: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0301' : '-acute'),
+    '\'': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0301' : ''),
     
-    hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0302' : '-hat'),
-    '^': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0302' : ''),
+    hat: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : '-hat'),
+    '^': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0302' : ''),
     
-    tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0303' : '-tilde'),
-    '~': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0303' : ''),
+    tilde: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : '-tilde'),
+    '~': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0303' : ''),
   
-    bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0304' : '-bar'),
-    '=': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0304' : ''),
+    bar: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : '-bar'),
+    '=': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0304' : ''),
     
-    overline: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0305' : '-underline'),
-    breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0306' : '-breve'),
-    u: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0306' : ''),
+    overline: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0305' : '-underline'),
+    breve: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : '-breve'),
+    u: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0306' : ''),
   
-    '.': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0307' : ''),
-    '"': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u0308' : ''),
+    '.': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0307' : ''),
+    '"': x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u0308' : ''),
     
     
-    r: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u030A' : ''),
-    H: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u030B' : ''),
-    v: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].isLetter(x) ? '\u030C' : ''),
+    r: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u030A' : ''),
+    H: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u030B' : ''),
+    v: x => x + (_utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].isLetter(x) ? '\u030C' : ''),
   
   
     kern: x => x.endsWith('em') ? ' '.repeat(x.substring(0, x.length - 2)) : ' ',
@@ -1432,168 +1431,24 @@
         n == 2 ? Unary.sqrt(x) :
           n == 3 ? Unary.cbrt(x) :
             n == 4 ? Unary.furt(x) :
-              _utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].suprender(n) + Unary.sqrt(x), 
+              _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].suprender(n) + Unary.sqrt(x), 
     }, 
-  
-    usecontext: x => (_context_context_js__WEBPACK_IMPORTED_MODULE_0__["default"].use(x), '')
   }
   Unary.mkern = Unary.kern
   Unary.mskip = Unary.kern
   Unary.hskip = Unary.kern
   Unary.hspace = Unary.kern
   
-  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].render(s, x))
+  _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames.forEach(x => Unary[x] = s => _utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].render(s, x))
   
   /* just for typeface: Parser */
-  Unary.typefaceNames = ['text', 'mathrm', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_2__["default"].typefaceNames]
+  Unary.typefaceNames = ['text', 'mathrm', ..._utils_unicode_js__WEBPACK_IMPORTED_MODULE_1__["default"].typefaceNames]
   
   /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Unary);
   
   
   /***/ }),
   /* 8 */
-  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-  
-  __webpack_require__.r(__webpack_exports__);
-  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-  /* harmony export */ });
-  /* harmony import */ var _extension_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9);
-  
-  // language
-  // macro-mode
-  
-  
-  
-  const Context = {
-  
-    minimal: {
-      enableDefaultValueIdentity: true,
-      extensions: [],
-      language: 'en-US',
-    },
-  
-    standard: {
-      enableDefaultValueIdentity: true,
-      extensions: [_extension_js__WEBPACK_IMPORTED_MODULE_0__.unimath],
-      language: 'en-US',
-    }
-  
-  }
-  
-  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Context);
-  
-  const ensureContextNonNull = x => x || Context.standard
-  
-  Context.use = function (context = Context.standard) {
-    typeof context == 'string' && (context = Context[context])
-    return context /* context != undefined */
-      ? context.extensions.forEach(x => _extension_js__WEBPACK_IMPORTED_MODULE_0__.ExtensionLoader.load(x))
-      : context
-  }
-  
-  Context.getContext = function () {
-    return ensureContextNonNull(Context.current)
-  }
-  
-  Context.use()
-  
-  
-  /***/ }),
-  /* 9 */
-  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-  
-  __webpack_require__.r(__webpack_exports__);
-  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-  /* harmony export */   "ExtensionLoader": () => (/* binding */ ExtensionLoader),
-  /* harmony export */   "unimath": () => (/* binding */ unimath)
-  /* harmony export */ });
-  /* harmony import */ var _macro_fixed_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6);
-  /* harmony import */ var _macro_unary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7);
-  /* harmony import */ var _macro_binary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
-  /* harmony import */ var _unitex_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(0);
-  
-  
-  
-  
-  
-  
-  
-  // more mathematics unicode as tex source code style
-  
-  const unimath = {
-  
-    title: 'unimath',
-    description: 'mathematics unicode extension',
-  
-    fixed: {
-  
-      napprox: '≉', // original
-      stareq: '≛', // original
-      deltaeq: '≜', // original
-  
-      meq: '≞', // original
-      defeq: '≝', // original
-      qeq: '≟', // original
-  
-      questeq: '≟', // fcitx & ibus
-      arceq: '≘', // fcitx & ibus
-      wedgeq: '≙', // fcitx & ibus
-      veeeq: '≚', // fcitx & ibus
-      circeq: '≗', // fcitx & ibus
-  
-      increment: '∆', // original
-  
-      smallin: '∊', // original
-      smallni: '∍', // original
-  
-      division: '∕', // original
-  
-      cint: '∱', // original
-      ccint: '∲', // original
-      accint: '∳', // original
-  
-      overa: '\u0363', // original
-      overe: '\u0364', // original
-      overi: '\u0365', // original
-      overo: '\u0366', // original
-      overu: '\u0367', // original
-  
-      overc: '\u0368', // original
-      overd: '\u0369', // original
-      overh: '\u036A', // original
-      overm: '\u036B', // original
-      overr: '\u036C', // original
-      overt: '\u036E', // original
-      overx: '\u036F', // original
-  
-    },
-  
-    binary: {
-      repeat: (s, n) => s.repeat(n),
-      for: (s, n) => [...Array(parseInt(n)).keys()]
-        .map(x => _unitex_js__WEBPACK_IMPORTED_MODULE_3__.UniTeX.parse(s.replace(/#(\d+)/g, (__, n) => x + + n)))
-        .reduce((x, y) => x + y)
-    }
-  
-  }
-  
-  const ExtensionLoader = {
-  
-    load: function (extension) {
-      const { fixed, unary, binary } = extension
-      fixed && Object.keys(fixed).forEach(x => _macro_fixed_js__WEBPACK_IMPORTED_MODULE_0__["default"][x] = fixed[x])
-      unary && Object.keys(unary).forEach(x => _macro_unary_js__WEBPACK_IMPORTED_MODULE_1__["default"][x] = unary[x])
-      binary && Object.keys(binary).forEach(x => _macro_binary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x] = binary[x])
-    }
-  
-  }
-  
-  
-  
-  
-  /***/ }),
-  /* 10 */
   /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
   
   __webpack_require__.r(__webpack_exports__);
@@ -1681,7 +1536,7 @@
   
   
   /***/ }),
-  /* 11 */
+  /* 9 */
   /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
   
   __webpack_require__.r(__webpack_exports__);
@@ -1897,6 +1752,241 @@
   
   
   
+  
+  /***/ }),
+  /* 10 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+  /* harmony export */ });
+  /* harmony import */ var _extension_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(11);
+  /* harmony import */ var _extensions_unimath_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(12);
+  /* harmony import */ var _extensions_shorthand_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
+  /* harmony import */ var _extensions_hyper_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(14);
+  /* harmony import */ var _macro_unary_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(7);
+  
+  // language
+  // macro-mode
+  
+  
+  
+  
+  
+  
+  
+  const Context = {
+  
+    minimal: {
+      title: 'minimal', 
+      enableDefaultValueIdentity: true,
+      extensions: [],
+      language: 'en-US',
+    },
+  
+    standard: {
+      title: 'standard', 
+      enableDefaultValueIdentity: true,
+      extensions: [_extensions_unimath_js__WEBPACK_IMPORTED_MODULE_1__.unimath, _extensions_shorthand_js__WEBPACK_IMPORTED_MODULE_2__.shorthand, _extensions_hyper_js__WEBPACK_IMPORTED_MODULE_3__.hyper],
+      language: 'en-US',
+    }, 
+  
+  
+  
+  }
+  
+  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Context);
+  
+  const ensureContextNonNull = x => x || Context.standard
+  
+  /* W.I.P. */
+  Context.use = function (context = Context.standard) {
+    typeof context == 'string' && (context = Context[context])
+    return context /* context != undefined */
+      ? context.extensions.forEach(x => _extension_js__WEBPACK_IMPORTED_MODULE_0__.ExtensionLoader.load(x))
+      : context
+  }
+  
+  _macro_unary_js__WEBPACK_IMPORTED_MODULE_4__["default"].usecontext = x => (Context.use(x), '')
+  
+  Context.getContext = function () {
+    return ensureContextNonNull(Context.current)
+  }
+  
+  Context.use()
+  
+  
+  /***/ }),
+  /* 11 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "ExtensionLoader": () => (/* binding */ ExtensionLoader)
+  /* harmony export */ });
+  /* harmony import */ var _macro_fixed_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6);
+  /* harmony import */ var _macro_unary_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7);
+  /* harmony import */ var _macro_binary_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+  
+  
+  
+  
+  
+  
+  // more mathematics unicode as tex source code style
+  
+  
+  const ExtensionLoader = {
+  
+    load: function (extension) {
+      const { fixed, unary, binary } = extension
+      fixed && Object.keys(fixed).forEach(x => _macro_fixed_js__WEBPACK_IMPORTED_MODULE_0__["default"][x] = fixed[x])
+      unary && Object.keys(unary).forEach(x => _macro_unary_js__WEBPACK_IMPORTED_MODULE_1__["default"][x] = unary[x])
+      binary && Object.keys(binary).forEach(x => _macro_binary_js__WEBPACK_IMPORTED_MODULE_2__["default"][x] = binary[x])
+    },
+  
+    // except link format `https://xxx/xxxx.js`
+    loadHttpResponse: function (link) {
+      if (XMLHttpRequest != undefined) {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", link, false);
+        xmlhttp.send();
+        if (xmlhttp.status == 200)
+          ExtensionLoader.load(xmlhttp.responseText)
+      }
+    }
+  
+  }
+  
+  
+  
+  
+  /***/ }),
+  /* 12 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "unimath": () => (/* binding */ unimath)
+  /* harmony export */ });
+  
+  const unimath = {
+  
+    title: 'unimath',
+    description: 'mathematics unicode extension',
+  
+    fixed: {
+  
+      napprox: '≉', // original
+      stareq: '≛', // original
+      deltaeq: '≜', // original
+  
+      meq: '≞', // original
+      defeq: '≝', // original
+      qeq: '≟', // original
+  
+      questeq: '≟', // fcitx & ibus
+      arceq: '≘', // fcitx & ibus
+      wedgeq: '≙', // fcitx & ibus
+      veeeq: '≚', // fcitx & ibus
+      circeq: '≗', // fcitx & ibus
+  
+      increment: '∆', // original
+  
+      smallin: '∊', // original
+      smallni: '∍', // original
+  
+      division: '∕', // original
+  
+      cint: '∱', // original
+      ccint: '∲', // original
+      accint: '∳', // original
+  
+      overa: '\u0363', // original
+      overe: '\u0364', // original
+      overi: '\u0365', // original
+      overo: '\u0366', // original
+      overu: '\u0367', // original
+  
+      overc: '\u0368', // original
+      overd: '\u0369', // original
+      overh: '\u036A', // original
+      overm: '\u036B', // original
+      overr: '\u036C', // original
+      overt: '\u036E', // original
+      overx: '\u036F', // original
+  
+    },
+  
+  }
+  
+  
+  /***/ }),
+  /* 13 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "shorthand": () => (/* binding */ shorthand)
+  /* harmony export */ });
+  
+  const autoFirstLetterUppercase = function (fixeds) {
+    Object.keys(fixeds).forEach(function (name) {
+      shorthand.fixed[name] = fixeds[name]
+      const [upperName, upperValue] = [name, fixeds[name]]
+        .map(x => x.charAt(0).toUpperCase() + x.substring(1))
+      shorthand.fixed[upperName] = upperValue
+    })
+  }
+  
+  const shorthand = {
+  
+    title: 'shorthand',
+    description: 'shorthand tex',
+  
+    fixed: {}
+  
+  }
+  
+  autoFirstLetterUppercase({
+    wlog: 'without loss of generality',
+    walog: 'without any loss of generality',
+    tfae: 'the following are equivalent',
+  })
+  
+  
+  /***/ }),
+  /* 14 */
+  /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+  
+  __webpack_require__.r(__webpack_exports__);
+  /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+  /* harmony export */   "hyper": () => (/* binding */ hyper)
+  /* harmony export */ });
+  /* harmony import */ var _unitex_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+  
+  
+  
+  const hyper = {
+  
+    title: 'hyper',
+    description: 'text processor extension',
+  
+    unary: {
+      length: s => s.length, 
+      lower: s => s.toLowerCase(), 
+      upper: s => s.toUpperCase(), 
+    }, 
+  
+    binary: {
+      repeat: (s, n) => s.repeat(n),
+      for: (s, n) => [...Array(parseInt(n)).keys()]
+        .map(x => _unitex_js__WEBPACK_IMPORTED_MODULE_0__.UniTeX.parse(s.replace(/#(\d+)/g, (__, n) => x + + n)))
+        .reduce((x, y) => x + y)
+    }
+  
+  }
   
   /***/ })
   /******/ 	]);
