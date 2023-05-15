@@ -31,7 +31,7 @@
 
     </div>
 
-    <div id="snackbar"></div>
+    <div id="snackbar">snackbar</div>
 
     <div id="console" class="console">script console</div>
     <div id="leftside">edit or paste</div>
@@ -102,7 +102,7 @@
     }
 
     const container = document.getElementById('container');
-    (new Date().getHours() >= 18) && (container.classList.add('night'))
+    (new Date().getHours() >= 18) && (container.classList.add('night'));
 
 
     const createElement = name => document.createElement(name)
@@ -230,7 +230,8 @@
     const showSnackbar = function (message) {
       if (getComputedStyle(snackbar).visibility == 'hidden') {
         snackbar.innerText = message;
-        snackbar.classList.add('show')
+        snackbar.style.width = Math.ceil(message.length / 2) + 'em';
+        snackbar.classList.add('show');
         setTimeout(() => snackbarUpdate('show', 'hide'), 1200);
         setTimeout(() => snackbar.classList.remove('hide'), 1500);
       }
