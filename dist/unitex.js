@@ -1108,6 +1108,7 @@ var UniTeX = (() => {
     r: unchecked_accents("\u030A"),
     H: unchecked_accents("\u030B"),
     v: unchecked_accents("\u030C"),
+    not: unchecked_accents("\u0338"),
     kern: (x) => x.endsWith("em") ? " ".repeat(x.substring(0, x.length - 2)) : " "
   };
   var UnaryOptional = {
