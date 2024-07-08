@@ -223,7 +223,7 @@ var UniTeX = (() => {
   Unicode.supscripts["\u03B1"] = "\u1D45";
   Unicode.supscripts["\u2032"] = "\u2032";
   Unicode.subscripts = {};
-  ["\u2080", "\u2081", "\u2082", "\u2083", "\u2084", "\u2085", "\u2086", "\u2087", "\u2088", "\u2089"].forEach((x, i) => Unicode.subscripts[i] == x);
+  ["\u2080", "\u2081", "\u2082", "\u2083", "\u2084", "\u2085", "\u2086", "\u2087", "\u2088", "\u2089"].forEach((x, i) => Unicode.subscripts[i] = x);
   Unicode.subscripts.a = "\u2090";
   Unicode.subscripts.e = "\u2091";
   Unicode.subscripts.h = "\u2095";
