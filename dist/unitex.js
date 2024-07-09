@@ -288,7 +288,7 @@ var UniTeX = (() => {
         const width = Math.max(this.width, block.width) + 2;
         const fracline = "-".repeat(width);
         const data2 = [...this.data, fracline, ...block.data];
-        return new _Block(data2.map((x) => x.fill(width)), this.height);
+        return new _Block(data2.map((x) => desired_length_string(x, width)), this.height);
       };
     }
     static of(s) {
@@ -1470,7 +1470,7 @@ var UniTeX = (() => {
   var inline_math = dollar.move(inline_cluster).skip(dollar);
   var block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.check((x) => fixed_default.infixs.includes(x)).map((x) => fixed_default[x])).map((x) => ` ${x} `.toBlock());
   var block_value = loose(single.map((x) => x.toBlock()).or(brace_wrap(() => block_cluster)));
-  var block_binary_macro = macro_head.check((x) => BinaryBlock[x]).follow(block_value, block_value).map((xs) => BinaryBlock[xs[0][0]](xs[0][1], xs[1]));
+  var block_binary_macro = macro_head.check((x) => BinaryBlock[x]).follows(block_value, block_value).map((xs) => BinaryBlock[xs[0][0]](xs[0][1], xs[1]));
   var block_elem = loose(block_infix).or(block_value).or(suporsub.map(block_default.of)).or(fixed_macro.map(block_default.of)).or(unary_macro.map(block_default.of)).or(block_binary_macro).or(token((x) => !solid(x)).some().map(() => block_default.empty));
   var block_cluster = block_elem.some().map((x) => x.reduce((s, t) => s.append(t)));
   var double_dollar = string("$$");
