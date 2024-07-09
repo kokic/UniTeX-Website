@@ -251,8 +251,7 @@ var UniTeX = (() => {
   // src/utils/block.js
   var desired_length_string = function(s, n) {
     const residue = n - s.length;
-    if (residue === 0)
-      return s;
+    if (residue === 0) return s;
     if (residue > 0) {
       const left = Math.floor(residue / 2);
       const right = residue - left;
@@ -269,8 +268,7 @@ var UniTeX = (() => {
       this.baseline = baseline;
       this.blocklift = function(n, offset) {
         const residue = n - this.height;
-        if (residue == 0)
-          return this;
+        if (residue == 0) return this;
         const topline = Array(offset).fill("");
         const bottomline = Array(residue - offset).fill("");
         return new _Block(topline.concat(this.data).concat(bottomline));
@@ -306,14 +304,10 @@ var UniTeX = (() => {
     return new Block(data, 1);
   };
   var frac = function(a, b) {
-    if (a instanceof Block && b instanceof Block)
-      return a.over(b);
-    if (typeof a == "string" && typeof b == "string")
-      return fracByString(a, b);
-    if (typeof a == "string")
-      return frac(new Block([a]), b);
-    if (typeof b == "string")
-      return frac(a, new Block([b]));
+    if (a instanceof Block && b instanceof Block) return a.over(b);
+    if (typeof a == "string" && typeof b == "string") return fracByString(a, b);
+    if (typeof a == "string") return frac(new Block([a]), b);
+    if (typeof b == "string") return frac(a, new Block([b]));
   };
   Block.frac = frac;
   String.prototype.add = function(x) {
