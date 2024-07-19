@@ -57,16 +57,19 @@ var UniTeX = (() => {
   var proper_default = Proper;
 
   // src/utils/unicode.js
-  Number.prototype.boundedIn = proxy((x, a, b) => a <= x && x <= b);
-  String.prototype.code = proxy((x) => x.codePointAt(0));
-  String.prototype.boundedIn = proxy((x, a, b) => x.code().boundedIn(a.code(), b.code()));
+  var boundedIn = (s, a, b) => {
+    const [code, min, max] = [s, a, b].map((x) => x.codePointAt(0));
+    if (!code || !min || !max)
+      return false;
+    return min <= code && code <= max;
+  };
   var Unicode = {
     typeface: {},
-    isLetter: (x) => x.boundedIn("a", "z") || x.boundedIn("A", "Z"),
+    isLetter: (x) => boundedIn(x, "a", "z") || boundedIn(x, "A", "Z"),
     series: function(a, b) {
-      let [code1, code2] = [a.code(), b.code()];
-      let length = code2 - code1 + 1;
-      let codes = Array.from({ length }, (_, x) => x + code1);
+      let [start, end2] = [a.codePointAt(0), b.codePointAt(0)];
+      let length = end2 - start + 1;
+      let codes = Array.from({ length }, (_, x) => x + start);
       return String.fromCodePoint(...codes);
     },
     alphabets: function() {
@@ -83,7 +86,7 @@ var UniTeX = (() => {
     /**
      * Renders the given string if it exists, using the specified unicode typeface.
      *
-     * @param {Array} s - The string to render.
+     * @param {string} s - The string to render.
      * @param {string} name - The name of the Unicode typeface to use.
      * @return {string} - The rendered string.
      */
@@ -316,8 +319,8 @@ var UniTeX = (() => {
   };
   var block_default = Block;
 
-  // src/macro/fixed.js
-  var Fixed = {
+  // src/macro/fixed.ts
+  var stableFixed = {
     N: unicode_default.typeface.mathbb.N,
     Z: unicode_default.typeface.mathbb.Z,
     Q: unicode_default.typeface.mathbb.Q,
@@ -333,17 +336,8 @@ var UniTeX = (() => {
     cnums: unicode_default.typeface.mathbb.C,
     Complex: unicode_default.typeface.mathbb.C,
     Bbbk: unicode_default.typeface.mathbb.k,
-    /**
-     * In order to express my respect to all TeX-related project developers, 
-     * I reserve these special macro commands and follow the consistent tradition 
-     * to implement UniTeX.
-     */
     TeX: "T\u1D07X",
     LaTeX: "L\u1D2CT\u1D07X",
-    KaTeX: "K\u1D2CT\u1D07X",
-    UniTeX: "U\u207F\u1D62T\u1D07X",
-    Agda: "\u{1D434}gda",
-    Lean: "L\u2203\u2200N",
     /* Accents */
     hat: "\u0302",
     tilde: "\u0303",
@@ -378,18 +372,6 @@ var UniTeX = (() => {
     varsigma: "\u03C2",
     varphi: "\u03C6",
     digamma: "\u03DD",
-    /* Theorem */
-    proposition: unicode_default.render_if_exists("Proposition", "textbf"),
-    lemma: unicode_default.render_if_exists("Lemma", "textbf"),
-    theorem: unicode_default.render_if_exists("Theorem", "textbf"),
-    corollary: unicode_default.render_if_exists("Corollary", "textbf"),
-    definition: unicode_default.render_if_exists("Definition", "textbf"),
-    remark: unicode_default.render_if_exists("Remark", "textbf"),
-    hypothesis: unicode_default.render_if_exists("Hypothesis", "textbf"),
-    conjecture: unicode_default.render_if_exists("Conjecture", "textbf"),
-    axiom: unicode_default.render_if_exists("Axiom", "textbf"),
-    example: unicode_default.render_if_exists("Example", "textbf"),
-    proof: unicode_default.render_if_exists("proof", "textit"),
     /* Combined Operatorname */
     argmax: "arg max",
     argmin: "arg min",
@@ -397,75 +379,6 @@ var UniTeX = (() => {
     liminf: "lim inf",
     limsup: "lim sup",
     projlim: "proj lim",
-    /* Infix Names */
-    infixs: [
-      "plus",
-      "minus",
-      /* stub */
-      "cdot",
-      "gtrdot",
-      "cdotp",
-      "intercal",
-      "centerdot",
-      "land",
-      "rhd",
-      "circ",
-      "leftthreetimes",
-      "rightthreetimes",
-      "amalg",
-      "circledast",
-      "ldotp",
-      "rtimes",
-      "And",
-      "circledcirc",
-      "lor",
-      "setminus",
-      "ast",
-      "circleddash",
-      "lessdot",
-      "smallsetminus",
-      "barwedge",
-      "Cup",
-      "lhd",
-      "sqcap",
-      "bigcirc",
-      "cup",
-      "ltimes",
-      "sqcup",
-      "bmod",
-      "curlyvee",
-      "mod",
-      "times",
-      "boxdot",
-      "curlywedge",
-      "mp",
-      "unlhd",
-      "boxminus",
-      "div",
-      "odot",
-      "unrhd",
-      "boxplus",
-      "divideontimes",
-      "ominus",
-      "uplus",
-      "boxtimes",
-      "dotplus",
-      "oplus",
-      "vee",
-      "bullet",
-      "doublebarwedge",
-      "otimes",
-      "veebar",
-      "Cap",
-      "doublecap",
-      "oslash",
-      "wedge",
-      "cap",
-      "doublecup",
-      "pm",
-      "plusmn",
-      "wr"
-    ],
     cdot: "\u22C5",
     cdotp: "\u22C5",
     dots: "\u2026",
@@ -931,15 +844,115 @@ var UniTeX = (() => {
     bigstar: "\u2605",
     Game: "\u2141",
     because: "\u2235",
-    suchthat: "\u2234",
-    /* Extensions */
+    suchthat: "\u2234"
+  };
+  var theoremEnvExtensions = {
+    proposition: unicode_default.render_if_exists("Proposition", "textbf"),
+    lemma: unicode_default.render_if_exists("Lemma", "textbf"),
+    theorem: unicode_default.render_if_exists("Theorem", "textbf"),
+    corollary: unicode_default.render_if_exists("Corollary", "textbf"),
+    definition: unicode_default.render_if_exists("Definition", "textbf"),
+    remark: unicode_default.render_if_exists("Remark", "textbf"),
+    hypothesis: unicode_default.render_if_exists("Hypothesis", "textbf"),
+    conjecture: unicode_default.render_if_exists("Conjecture", "textbf"),
+    axiom: unicode_default.render_if_exists("Axiom", "textbf"),
+    example: unicode_default.render_if_exists("Example", "textbf"),
+    proof: unicode_default.render_if_exists("proof", "textit")
+  };
+  var texLikeExtensions = {
+    KaTeX: "K\u1D2CT\u1D07X",
+    UniTeX: "U\u207F\u1D62T\u1D07X",
+    Agda: "\u{1D434}gda",
+    Lean: "L\u2203\u2200N"
+  };
+  var combinatorialExtensions = {
     sumtop: "\u23B2",
     sumbottom: "\u23B3",
     lbraceuend: "\u23A7",
     lbracemid: "\u23A8",
     lbracelend: "\u23A9"
   };
-  var operatornames = [
+  var createFixed = (options) => {
+    const fixed = stableFixed;
+    options.useTheoremEnvExtensions && Object.assign(fixed, theoremEnvExtensions);
+    options.useTexLikeExtensions && Object.assign(fixed, texLikeExtensions);
+    options.useCombinatorialExtensions && Object.assign(fixed, combinatorialExtensions);
+    return fixed;
+  };
+  var Fixed = createFixed({
+    useTheoremEnvExtensions: true,
+    useTexLikeExtensions: true,
+    useCombinatorialExtensions: true
+  });
+  var FixedInfixes = [
+    "plus",
+    "minus",
+    /* stub */
+    "cdot",
+    "gtrdot",
+    "cdotp",
+    "intercal",
+    "centerdot",
+    "land",
+    "rhd",
+    "circ",
+    "leftthreetimes",
+    "rightthreetimes",
+    "amalg",
+    "circledast",
+    "ldotp",
+    "rtimes",
+    "And",
+    "circledcirc",
+    "lor",
+    "setminus",
+    "ast",
+    "circleddash",
+    "lessdot",
+    "smallsetminus",
+    "barwedge",
+    "Cup",
+    "lhd",
+    "sqcap",
+    "bigcirc",
+    "cup",
+    "ltimes",
+    "sqcup",
+    "bmod",
+    "curlyvee",
+    "mod",
+    "times",
+    "boxdot",
+    "curlywedge",
+    "mp",
+    "unlhd",
+    "boxminus",
+    "div",
+    "odot",
+    "unrhd",
+    "boxplus",
+    "divideontimes",
+    "ominus",
+    "uplus",
+    "boxtimes",
+    "dotplus",
+    "oplus",
+    "vee",
+    "bullet",
+    "doublebarwedge",
+    "otimes",
+    "veebar",
+    "Cap",
+    "doublecap",
+    "oslash",
+    "wedge",
+    "cap",
+    "doublecup",
+    "pm",
+    "plusmn",
+    "wr"
+  ];
+  var operatorNames = [
     "arcsin",
     "arccos",
     "arctan",
@@ -982,7 +995,7 @@ var UniTeX = (() => {
     "tg",
     "th"
   ];
-  operatornames.forEach((x) => Fixed[x] = x);
+  operatorNames.forEach((x) => Fixed[x] = x);
   var greeks = [
     "Alpha",
     "Beta",
@@ -1073,7 +1086,7 @@ var UniTeX = (() => {
   BinaryBlock["tfrac"] = BinaryBlock.frac;
   var binary_default = Binary;
 
-  // src/macro/unary.js
+  // src/macro/unary.ts
   var unchecked_accents = (unicode) => (x) => `${x}${unicode}`;
   var Unary = {
     id: (x) => x,
@@ -1103,8 +1116,9 @@ var UniTeX = (() => {
     H: unchecked_accents("\u030B"),
     v: unchecked_accents("\u030C"),
     not: unchecked_accents("\u0338"),
-    kern: (x) => x.endsWith("em") ? " ".repeat(x.substring(0, x.length - 2)) : " "
+    kern: (x) => x.endsWith("em") ? " ".repeat(+x.substring(0, x.length - 2)) : " "
   };
+  var unary_default = Unary;
   var UnaryOptional = {
     sqrt: (n, x) => {
       switch (n) {
@@ -1119,13 +1133,11 @@ var UniTeX = (() => {
       }
     }
   };
-  Unary.mkern = Unary.kern;
-  Unary.mskip = Unary.kern;
-  Unary.hskip = Unary.kern;
-  Unary.hspace = Unary.kern;
+  for (const key of ["mkern", "mskip", "hskip", "hspace"]) {
+    Unary[key] = Unary.kern;
+  }
   unicode_default.typefaceNames.forEach((x) => Unary[x] = (s) => unicode_default.render_if_exists(s, x));
-  Unary.typefaceNames = ["text", "mathrm", ...unicode_default.typefaceNames];
-  var unary_default = Unary;
+  var UnaryTypefaceNames = ["text", "mathrm", ...unicode_default.typefaceNames];
 
   // src/macro/environment.js
   var Environment = {
@@ -1456,13 +1468,13 @@ var UniTeX = (() => {
   var subscript = character("_").move(value).map(unicode_default.subrender);
   var suporsub = supscript.or(subscript);
   var comment = character("%").skip(token((x) => x != "\n").asterisk()).skip(character("\n")).map(() => "");
-  var typeface2 = macro_head.check((x) => unary_default.typefaceNames.includes(x)).follow(value).map((name, arg1) => unary_default[name](arg1));
+  var typeface2 = macro_head.check((x) => UnaryTypefaceNames.includes(x)).follow(value).map((name, arg1) => unary_default[name](arg1));
   var inline_elem = literals.or(suporsub).or(environ).or(unary_macro).or(binary_macro).or(value);
   var italic_render = (s) => unicode_default.render_if_exists(s, "mathit");
   var inline_cluster = typeface2.or(inline_elem.map(italic_render)).plus();
   var dollar = character("$");
   var inline_math = dollar.move(inline_cluster).skip(dollar);
-  var block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.check((x) => fixed_default.infixs.includes(x)).map((x) => fixed_default[x])).map((x) => ` ${x} `.toBlock());
+  var block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.check((x) => FixedInfixes.includes(x)).map((x) => fixed_default[x])).map((x) => ` ${x} `.toBlock());
   var block_value = loose(single.map((x) => x.toBlock()).or(brace_wrap(() => block_cluster)));
   var block_binary_macro = macro_head.check((x) => BinaryBlock[x]).follows(block_value, block_value).map((xs) => BinaryBlock[xs[0][0]](xs[0][1], xs[1]));
   var block_elem = loose(block_infix).or(block_value).or(suporsub.map(block_default.of)).or(fixed_macro.map(block_default.of)).or(unary_macro.map(block_default.of)).or(block_binary_macro).or(token((x) => !solid(x)).some().map(() => block_default.empty));
