@@ -8,8 +8,6 @@
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=JetBrains+Mono">
   <script src="https://codemirror.net/codemirror.js"></script>
-
-  <script src="./dist/unitex.js"></script>
   <script src="./dist/legacy-modes-stex/stex.js"></script>
 
   <link rel="stylesheet" href="./page/css/site.css">
@@ -66,7 +64,9 @@
     <a class="vert-top" href="https://github.com/kokic/UniTeX" target="_blank">Github</a>
   </div>
 
-  <script>
+  <script type="module">
+
+    import { UniTeX } from "./dist/unitex.js"
 
     const { basicSetup } = CM["codemirror"]
     const { EditorView, keymap } = CM["@codemirror/view"]
