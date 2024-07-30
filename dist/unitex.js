@@ -1,4 +1,4 @@
-// src/utils/proper.ts
+// src/impl/unicode/proper.ts
 var shouldWrap = (x) => x.charAt(0) == "-" ? shouldWrap(x.substring(1)) : x.length <= 1;
 var Proper;
 ((Proper) => {
@@ -9,45 +9,7 @@ var Proper;
 })(Proper ||= {});
 var proper_default = Proper;
 
-// src/string-iterator.ts
-class StringIterator {
-  source;
-  index;
-  constructor(source, index) {
-    this.source = source;
-    this.index = index;
-  }
-  extract(pos) {
-    const end = typeof pos == "number" ? pos : pos.index;
-    return this.source.substring(this.index, end);
-  }
-  hasNext() {
-    return this.index < this.source.length;
-  }
-  curr() {
-    return this.source.charAt(this.index);
-  }
-  next() {
-    return new StringIterator(this.source, this.index + 1);
-  }
-  forward(length) {
-    return new StringIterator(this.source, this.index + length);
-  }
-}
-
-// src/declare-global.ts
-Number.prototype.boundedIn = function(a, b) {
-  return a <= this && this <= b;
-};
-String.prototype.boundedIn = function(a, b) {
-  const [code, start, end] = [this, a, b].map((s) => s.codePointAt(0));
-  return code.boundedIn(start, end);
-};
-String.prototype.toIterator = function() {
-  return new StringIterator(this, 0);
-};
-
-// src/utils/unicode.ts
+// src/impl/unicode/unicode-table.ts
 var Unicode = {
   typeface: {},
   isLetter: (s) => s.boundedIn("a", "z") || s.boundedIn("A", "Z"),
@@ -195,90 +157,25 @@ Unicode.subscripts["-"] = "\u208B";
 Unicode.subscripts["="] = "\u208C";
 Unicode.subscripts["("] = "\u208D";
 Unicode.subscripts[")"] = "\u208E";
-var unicode_default = Unicode;
+var unicode_table_default = Unicode;
 
-// src/utils/block.ts
-var desired_length_string = function(s, n) {
-  const residue = n - s.length;
-  if (residue === 0)
-    return s;
-  if (residue > 0) {
-    const left = Math.floor(residue / 2);
-    const right = residue - left;
-    return " ".repeat(left) + s + " ".repeat(right);
-  }
-  return s.substring(0, n);
-};
-
-class Block {
-  width;
-  height;
-  data;
-  display;
-  baseline;
-  constructor(data, baseline = 0) {
-    this.width = Math.max(...data.map((x) => x.length));
-    this.height = data.length;
-    this.data = data.map((x) => desired_length_string(x, this.width));
-    this.display = this.data.join("\n");
-    this.baseline = baseline;
-  }
-  adjustHeight(n, offset) {
-    const residue = n - this.height;
-    if (residue == 0) {
-      return this;
-    }
-    const topLine = Array(offset).fill("");
-    const bottomLine = Array(residue - offset).fill("");
-    return new Block(topLine.concat(this.data).concat(bottomLine));
-  }
-  append(block) {
-    const isHigher = this.height > block.height;
-    const isGreat = this.baseline > block.baseline;
-    const [offset, baseline] = isGreat ? [this.baseline - block.baseline, this.baseline] : [block.baseline - this.baseline, block.baseline];
-    const [left, right] = isHigher ? [this.data, block.adjustHeight(this.height, offset).data] : [this.adjustHeight(block.height, offset).data, block.data];
-    return new Block(left.map((v, i) => v + right[i]), baseline);
-  }
-  add = (block) => this.append(Block.plus).append(block);
-  over(block) {
-    const width = Math.max(this.width, block.width) + 2;
-    const fracline = "-".repeat(width);
-    const data = [...this.data, fracline, ...block.data];
-    return new Block(data.map((x) => desired_length_string(x, width)), this.height);
-  }
-  static of = (s) => new Block([s]);
-  static empty = Block.of("");
-  static plus = Block.of(" + ");
-  static fromStrings(p, q) {
-    const width = Math.max(p.length, q.length) + 2;
-    const desired_p = desired_length_string(p, width);
-    const desired_q = desired_length_string(q, width);
-    const data = [desired_p, "-".repeat(width), desired_q];
-    return new Block(data, 1);
-  }
-  static frac(a, b) {
-    return a instanceof Block && b instanceof Block ? a.over(b) : typeof a == "string" && typeof b == "string" ? Block.fromStrings(a, b) : typeof a == "string" ? Block.frac(Block.of(a), b) : Block.frac(a, Block.of(b));
-  }
-}
-var block_default = Block;
-
-// src/macro/fixed.ts
+// src/impl/unicode/fixed.ts
 var stableFixed = {
-  N: unicode_default.typeface.mathbb.N,
-  Z: unicode_default.typeface.mathbb.Z,
-  Q: unicode_default.typeface.mathbb.Q,
-  R: unicode_default.typeface.mathbb.R,
-  C: unicode_default.typeface.mathbb.C,
-  CC: unicode_default.typeface.mathbb.C,
-  A: unicode_default.typeface.mathbb.A,
-  F: unicode_default.typeface.mathbb.F,
-  SS: unicode_default.typeface.mathbb.S,
-  natnums: unicode_default.typeface.mathbb.N,
-  reals: unicode_default.typeface.mathbb.R,
-  Reals: unicode_default.typeface.mathbb.R,
-  cnums: unicode_default.typeface.mathbb.C,
-  Complex: unicode_default.typeface.mathbb.C,
-  Bbbk: unicode_default.typeface.mathbb.k,
+  N: unicode_table_default.typeface.mathbb.N,
+  Z: unicode_table_default.typeface.mathbb.Z,
+  Q: unicode_table_default.typeface.mathbb.Q,
+  R: unicode_table_default.typeface.mathbb.R,
+  C: unicode_table_default.typeface.mathbb.C,
+  CC: unicode_table_default.typeface.mathbb.C,
+  A: unicode_table_default.typeface.mathbb.A,
+  F: unicode_table_default.typeface.mathbb.F,
+  SS: unicode_table_default.typeface.mathbb.S,
+  natnums: unicode_table_default.typeface.mathbb.N,
+  reals: unicode_table_default.typeface.mathbb.R,
+  Reals: unicode_table_default.typeface.mathbb.R,
+  cnums: unicode_table_default.typeface.mathbb.C,
+  Complex: unicode_table_default.typeface.mathbb.C,
+  Bbbk: unicode_table_default.typeface.mathbb.k,
   TeX: "T\u1D07X",
   LaTeX: "L\u1D2CT\u1D07X",
   hat: "\u0302",
@@ -766,17 +663,17 @@ var stableFixed = {
   suchthat: "\u2234"
 };
 var theoremEnvExtensions = {
-  proposition: unicode_default.render_if_exists("Proposition", "textbf"),
-  lemma: unicode_default.render_if_exists("Lemma", "textbf"),
-  theorem: unicode_default.render_if_exists("Theorem", "textbf"),
-  corollary: unicode_default.render_if_exists("Corollary", "textbf"),
-  definition: unicode_default.render_if_exists("Definition", "textbf"),
-  remark: unicode_default.render_if_exists("Remark", "textbf"),
-  hypothesis: unicode_default.render_if_exists("Hypothesis", "textbf"),
-  conjecture: unicode_default.render_if_exists("Conjecture", "textbf"),
-  axiom: unicode_default.render_if_exists("Axiom", "textbf"),
-  example: unicode_default.render_if_exists("Example", "textbf"),
-  proof: unicode_default.render_if_exists("proof", "textit")
+  proposition: unicode_table_default.render_if_exists("Proposition", "textbf"),
+  lemma: unicode_table_default.render_if_exists("Lemma", "textbf"),
+  theorem: unicode_table_default.render_if_exists("Theorem", "textbf"),
+  corollary: unicode_table_default.render_if_exists("Corollary", "textbf"),
+  definition: unicode_table_default.render_if_exists("Definition", "textbf"),
+  remark: unicode_table_default.render_if_exists("Remark", "textbf"),
+  hypothesis: unicode_table_default.render_if_exists("Hypothesis", "textbf"),
+  conjecture: unicode_table_default.render_if_exists("Conjecture", "textbf"),
+  axiom: unicode_table_default.render_if_exists("Axiom", "textbf"),
+  example: unicode_table_default.render_if_exists("Example", "textbf"),
+  proof: unicode_table_default.render_if_exists("proof", "textit")
 };
 var texLikeExtensions = {
   KaTeX: "K\u1D2CT\u1D07X",
@@ -964,14 +861,130 @@ var greeks = [
   "psi",
   "omega"
 ];
-greeks.forEach((x, i) => Fixed[x] = unicode_default.greeks[i]);
+greeks.forEach((x, i) => Fixed[x] = unicode_table_default.greeks[i]);
 Fixed.epsilon = "\u03F5";
-unicode_default.supscripts[Fixed.times] = unicode_default.supscripts.x;
-unicode_default.subscripts[Fixed.in] = Fixed.smallin;
-unicode_default.subscripts[Fixed.ni] = Fixed.smallni;
+unicode_table_default.supscripts[Fixed.times] = unicode_table_default.supscripts.x;
+unicode_table_default.subscripts[Fixed.in] = Fixed.smallin;
+unicode_table_default.subscripts[Fixed.ni] = Fixed.smallni;
 var fixed_default = Fixed;
 
-// src/macro/binary.ts
+// src/impl/unicode/unary.ts
+var unchecked_accents = (unicode) => (x) => `${x}${unicode}`;
+var Unary = {
+  id: (x) => x,
+  text: (x) => x,
+  mathrm: (x) => x,
+  sqrt: (x) => "\u221A" + proper_default.paren(x),
+  cbrt: (x) => "\u221B" + proper_default.paren(x),
+  furt: (x) => "\u221C" + proper_default.paren(x),
+  grave: (x) => x + (unicode_table_default.isLetter(x) ? "\u0300" : "-grave"),
+  "`": unchecked_accents("\u0300"),
+  acute: (x) => x + (unicode_table_default.isLetter(x) ? "\u0301" : "-acute"),
+  "\'": unchecked_accents("\u0301"),
+  hat: (x) => x + (unicode_table_default.isLetter(x) ? "\u0302" : "-hat"),
+  "^": unchecked_accents("\u0302"),
+  tilde: (x) => x + (unicode_table_default.isLetter(x) ? "\u0303" : "-tilde"),
+  "~": unchecked_accents("\u0303"),
+  bar: (x) => x + (unicode_table_default.isLetter(x) ? "\u0304" : "-bar"),
+  "=": unchecked_accents("\u0304"),
+  overline: (x) => x + (unicode_table_default.isLetter(x) ? "\u0305" : "-underline"),
+  breve: (x) => x + (unicode_table_default.isLetter(x) ? "\u0306" : "-breve"),
+  u: unchecked_accents("\u0306"),
+  ".": unchecked_accents("\u0307"),
+  '"': unchecked_accents("\u0308"),
+  r: unchecked_accents("\u030A"),
+  H: unchecked_accents("\u030B"),
+  v: unchecked_accents("\u030C"),
+  not: unchecked_accents("\u0338"),
+  kern: (x) => x.endsWith("em") ? " ".repeat(+x.substring(0, x.length - 2)) : " "
+};
+var unary_default = Unary;
+var UnaryOptional = {
+  sqrt: (n, x) => {
+    switch (n) {
+      case "2":
+        return Unary.sqrt(x);
+      case "3":
+        return Unary.cbrt(x);
+      case "4":
+        return Unary.furt(x);
+      default:
+        return unicode_table_default.suprender(n) + Unary.sqrt(x);
+    }
+  }
+};
+for (const key of ["mkern", "mskip", "hskip", "hspace"]) {
+  Unary[key] = Unary.kern;
+}
+unicode_table_default.typefaceNames.forEach((x) => Unary[x] = (s) => unicode_table_default.render_if_exists(s, x));
+var UnaryTypefaceNames = ["text", "mathrm", ...unicode_table_default.typefaceNames];
+
+// src/impl/unicode/block.ts
+var desired_length_string = function(s, n) {
+  const residue = n - s.length;
+  if (residue === 0)
+    return s;
+  if (residue > 0) {
+    const left = Math.floor(residue / 2);
+    const right = residue - left;
+    return " ".repeat(left) + s + " ".repeat(right);
+  }
+  return s.substring(0, n);
+};
+
+class Block {
+  width;
+  height;
+  data;
+  display;
+  baseline;
+  constructor(data, baseline = 0) {
+    this.width = Math.max(...data.map((x) => x.length));
+    this.height = data.length;
+    this.data = data.map((x) => desired_length_string(x, this.width));
+    this.display = this.data.join("\n");
+    this.baseline = baseline;
+  }
+  adjustHeight(n, offset) {
+    const residue = n - this.height;
+    if (residue == 0) {
+      return this;
+    }
+    const topLine = Array(offset).fill("");
+    const bottomLine = Array(residue - offset).fill("");
+    return new Block(topLine.concat(this.data).concat(bottomLine));
+  }
+  append(block) {
+    const isHigher = this.height > block.height;
+    const isGreat = this.baseline > block.baseline;
+    const [offset, baseline] = isGreat ? [this.baseline - block.baseline, this.baseline] : [block.baseline - this.baseline, block.baseline];
+    const [left, right] = isHigher ? [this.data, block.adjustHeight(this.height, offset).data] : [this.adjustHeight(block.height, offset).data, block.data];
+    return new Block(left.map((v, i) => v + right[i]), baseline);
+  }
+  add = (block) => this.append(Block.plus).append(block);
+  over(block) {
+    const width = Math.max(this.width, block.width) + 2;
+    const fracline = "-".repeat(width);
+    const data = [...this.data, fracline, ...block.data];
+    return new Block(data.map((x) => desired_length_string(x, width)), this.height);
+  }
+  static of = (s) => new Block([s]);
+  static empty = Block.of("");
+  static plus = Block.of(" + ");
+  static fromStrings(p, q) {
+    const width = Math.max(p.length, q.length) + 2;
+    const desired_p = desired_length_string(p, width);
+    const desired_q = desired_length_string(q, width);
+    const data = [desired_p, "-".repeat(width), desired_q];
+    return new Block(data, 1);
+  }
+  static frac(a, b) {
+    return a instanceof Block && b instanceof Block ? a.over(b) : typeof a == "string" && typeof b == "string" ? Block.fromStrings(a, b) : typeof a == "string" ? Block.frac(Block.of(a), b) : Block.frac(a, Block.of(b));
+  }
+}
+var block_default = Block;
+
+// src/impl/unicode/binary.ts
 var oversetEquationMap = {
   "?=": fixed_default.qeq,
   "m=": fixed_default.meq,
@@ -986,7 +999,7 @@ var Binary = {
   alias: (a, x) => (fixed_default[a] = x, "")
 };
 var BinaryBlock = {
-  frac: (x, y) => block_default.frac(x, y),
+  frac: block_default.frac,
   overset: (x, y) => block_default.of(Binary.overset(x.display, y.display))
 };
 var BinaryInfix = {
@@ -1002,101 +1015,7 @@ BinaryBlock["dfrac"] = BinaryBlock.frac;
 BinaryBlock["tfrac"] = BinaryBlock.frac;
 var binary_default = Binary;
 
-// src/macro/unary.ts
-var unchecked_accents = (unicode3) => (x) => `${x}${unicode3}`;
-var Unary = {
-  id: (x) => x,
-  text: (x) => x,
-  mathrm: (x) => x,
-  sqrt: (x) => "\u221A" + proper_default.paren(x),
-  cbrt: (x) => "\u221B" + proper_default.paren(x),
-  furt: (x) => "\u221C" + proper_default.paren(x),
-  grave: (x) => x + (unicode_default.isLetter(x) ? "\u0300" : "-grave"),
-  "`": unchecked_accents("\u0300"),
-  acute: (x) => x + (unicode_default.isLetter(x) ? "\u0301" : "-acute"),
-  "\'": unchecked_accents("\u0301"),
-  hat: (x) => x + (unicode_default.isLetter(x) ? "\u0302" : "-hat"),
-  "^": unchecked_accents("\u0302"),
-  tilde: (x) => x + (unicode_default.isLetter(x) ? "\u0303" : "-tilde"),
-  "~": unchecked_accents("\u0303"),
-  bar: (x) => x + (unicode_default.isLetter(x) ? "\u0304" : "-bar"),
-  "=": unchecked_accents("\u0304"),
-  overline: (x) => x + (unicode_default.isLetter(x) ? "\u0305" : "-underline"),
-  breve: (x) => x + (unicode_default.isLetter(x) ? "\u0306" : "-breve"),
-  u: unchecked_accents("\u0306"),
-  ".": unchecked_accents("\u0307"),
-  '"': unchecked_accents("\u0308"),
-  r: unchecked_accents("\u030A"),
-  H: unchecked_accents("\u030B"),
-  v: unchecked_accents("\u030C"),
-  not: unchecked_accents("\u0338"),
-  kern: (x) => x.endsWith("em") ? " ".repeat(+x.substring(0, x.length - 2)) : " "
-};
-var unary_default = Unary;
-var UnaryOptional = {
-  sqrt: (n, x) => {
-    switch (n) {
-      case 2:
-        return Unary.sqrt(x);
-      case 3:
-        return Unary.cbrt(x);
-      case 4:
-        return Unary.furt(x);
-      default:
-        return unicode_default.suprender(`${n}`) + Unary.sqrt(x);
-    }
-  }
-};
-for (const key of ["mkern", "mskip", "hskip", "hspace"]) {
-  Unary[key] = Unary.kern;
-}
-unicode_default.typefaceNames.forEach((x) => Unary[x] = (s) => unicode_default.render_if_exists(s, x));
-var UnaryTypefaceNames = ["text", "mathrm", ...unicode_default.typefaceNames];
-
-// src/macro/environment.ts
-var Environment = {
-  matrix: (s) => separateMatrix(s, " ", " ", "; "),
-  smallmatrix: (s) => separateMatrix(s, " ", " ", "; "),
-  bmatrix: (s) => regularMatrix(s, "[", "]"),
-  pmatrix: (s) => regularMatrix(s, "(", ")"),
-  vmatrix: (s) => separateMatrix(s, "|", "|", "; "),
-  Bmatrix: (s) => regularMatrix(s, "{", "}"),
-  Vmatrix: (s) => separateMatrix(s, "||", "||", "; "),
-  proposition: (s) => theorem_style("proposition", s),
-  lemma: (s) => theorem_style("lemma", s),
-  theorem: (s) => theorem_style("theorem", s),
-  corollary: (s) => theorem_style("corollary", s),
-  definition: (s) => theorem_style("definition", s),
-  remark: (s) => theorem_style("remark", s),
-  hypothesis: (s) => theorem_style("hypothesis", s),
-  conjecture: (s) => theorem_style("conjecture", s),
-  axiom: (s) => theorem_style("axiom", s),
-  example: (s) => theorem_style("example", s),
-  proof: (s) => theorem_style("proof", s)
-};
-var doubleBackslash = "\\\\";
-var matrixM = (s) => s.replace(/\s/g, "").replace(/&/g, " ");
-var regularMatrix = function(matrix, leftSymbol, rightSymbol, leftGlobalSymbol = leftSymbol, rightGlobalSymbol = rightSymbol) {
-  const xs = matrix.split(doubleBackslash);
-  const s = "".concat(...xs.map((s2) => leftSymbol + matrixM(s2) + rightSymbol));
-  return xs.length > 1 ? leftGlobalSymbol + s + rightGlobalSymbol : s;
-};
-var separateMatrix = function(matrix, leftGlobalSymbol, rightGlobalSymbol, separator) {
-  const xs = matrix.split(doubleBackslash);
-  return leftGlobalSymbol + xs.map(matrixM).join(separator) + rightGlobalSymbol;
-};
-var polymerize_tex = function(s) {
-  let result = s.trim().replace(/ *\r\n *| *\n *| (?= )/g, "").replace(/ *(,|\.) */g, "$1 ");
-  return result;
-};
-var regexpDoubleLine = /\r\n\r\n|\n\n/;
-var theorem_style = function(type, content) {
-  let title = fixed_default[type] + ". ";
-  return title + content.split(regexpDoubleLine).map(polymerize_tex).join("\n");
-};
-var environment_default = Environment;
-
-// src/parse.ts
+// src/parsec/parse.ts
 var success = (pos, res) => ({ type: "success", pos, res });
 var defaultMessage = (pos) => `mismatched: ${pos.extract(pos.index + 5)}...`;
 var error = (pos, err) => ({ type: "error", pos, err: err ? err : defaultMessage(pos) });
@@ -1114,11 +1033,11 @@ var Flat;
   Flat.pchar = (c) => Flat.attempt(bind(Flat.anyChar, (u) => u == c ? pure(c) : fail(`expected: ${c}`)));
 })(Flat ||= {});
 
-// src/lazy.ts
+// src/parsec/lazy.ts
 var of = (run) => ({ type: "lazy", run });
 var run = (val) => ("type" in val) && val.type == "lazy" ? val.run() : val;
 
-// src/combinator.ts
+// src/parsec/combinator.ts
 class Parser {
   parse;
   constructor(parse2) {
@@ -1206,7 +1125,7 @@ class Parser {
   }
 }
 
-// src/collection.ts
+// src/parsec/collection.ts
 var token = (predicate, err) => new Parser((it, c = it.curr()) => c && predicate(c) ? success(it.next(), c) : error(it, err || "token mismatch"));
 var character = (c) => new Parser(Flat.pchar(c));
 var includes = (...xs) => token((x) => xs.includes(x));
@@ -1220,7 +1139,45 @@ var digits = digit.plus();
 var letter = token((c) => c.boundedIn("a", "z") || c.boundedIn("A", "Z"));
 var letters = letter.plus();
 
-// unitex.ts
+// src/parsec/string-iterator.ts
+class StringIterator {
+  source;
+  index;
+  constructor(source, index) {
+    this.source = source;
+    this.index = index;
+  }
+  extract(pos) {
+    const end = typeof pos == "number" ? pos : pos.index;
+    return this.source.substring(this.index, end);
+  }
+  hasNext() {
+    return this.index < this.source.length;
+  }
+  curr() {
+    return this.source.charAt(this.index);
+  }
+  next() {
+    return new StringIterator(this.source, this.index + 1);
+  }
+  forward(length) {
+    return new StringIterator(this.source, this.index + length);
+  }
+}
+
+// src/parsec/declare-global.ts
+Number.prototype.boundedIn = function(a, b) {
+  return a <= this && this <= b;
+};
+String.prototype.boundedIn = function(a, b) {
+  const [code, start, end] = [this, a, b].map((s) => s.codePointAt(0));
+  return code.boundedIn(start, end);
+};
+String.prototype.toIterator = function() {
+  return new StringIterator(this, 0);
+};
+
+// src/cli.ts
 var backslash = character("\\");
 var lbrace = character("{");
 var rbrace = character("}");
@@ -1233,55 +1190,137 @@ var literal = token((x) => !special(x));
 var literals = literal.plus();
 var solid = (s) => s.trim().length == 1;
 var valuesymbol = literal.assume(solid);
-var single = digit.or(letter).or(valuesymbol).or(of(() => fixed_macro));
-var value = loose(single.or(brace_wrap(of(() => text))));
-var optional = bracket_wrap(value);
-var symbol_macros = includes(...'|,>:;!()[]{}_%\\`^~=."\'');
-var macro_name = letters.or(symbol_macros);
-var macro_head = backslash.move(macro_name);
-var fixed_macro = macro_head.assume((x) => (x in fixed_default)).map((s) => fixed_default[s]);
-var unary_ordinary_macro = macro_head.assume((x) => (x in unary_default)).follow(value).map(([name, arg1]) => unary_default[name](arg1));
-var unary_optional_macro = macro_head.assume((x) => UnaryOptional[x]).follow2(optional, value).map(([[name, opt1], arg1]) => UnaryOptional[name](opt1, arg1));
-var unary_macro = unary_optional_macro.or(unary_ordinary_macro);
-var binary_macro = macro_head.assume((x) => !!binary_default[x]).follow2(value, value).map(([[name, arg1], arg2]) => binary_default[name](arg1, arg2));
-var infix_macro = value.follow(macro_head.assume((x) => !!BinaryInfix[x])).follow(value).map((xs) => binary_default[xs[0][1]](xs[0][0], xs[1]));
-var braced_letters = brace_wrap(letters);
-var begin = backslash.skip(string("begin")).move(braced_letters);
-var end = backslash.skip(string("end")).move(braced_letters);
-var environ = begin.follow(of(() => section)).follow(end).assume((xs) => xs[0][0] == xs[1]).map((xs) => environment_default[xs[1]](xs[0][1]));
-var supscript = character("^").move(value).map(unicode_default.suprender);
-var subscript = character("_").move(value).map(unicode_default.subrender);
-var suporsub = supscript.or(subscript);
-var comment = character("%").skip(token((x) => x != "\n").asterisk()).skip(character("\n")).map(() => "");
-var typeface2 = macro_head.assume((x) => UnaryTypefaceNames.includes(x)).follow(value).map(([name, arg1]) => unary_default[name](arg1));
-var inline_elem = literals.or(suporsub).or(environ).or(unary_macro).or(binary_macro).or(value);
-var italic_render = (s) => unicode_default.render_if_exists(s, "mathit");
-var inline_cluster = typeface2.or(inline_elem.map(italic_render)).plus();
-var dollar = character("$");
-var inline_math = dollar.move(inline_cluster).skip(dollar);
-var block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => FixedInfixes.includes(x)).map((x) => fixed_default[x])).map((x) => new block_default([` ${x} `]));
-var block_value = loose(single.map((x) => new block_default([x])).or(brace_wrap(of(() => block_cluster))));
-var block_binary_macro = macro_head.assume((x) => BinaryBlock[x]).follow2(block_value, block_value).map((xs) => BinaryBlock[xs[0][0]](xs[0][1], xs[1]));
-var block_elem = loose(block_infix).or(block_value).or(suporsub.map(block_default.of)).or(fixed_macro.map(block_default.of)).or(unary_macro.map(block_default.of)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => block_default.empty));
-var block_cluster = block_elem.some().map((x) => x.reduce((s, t) => s.append(t)));
-var double_dollar = string("$$");
-var block_math = double_dollar.move(block_cluster.map((x) => x.display)).skip(double_dollar);
-var mathstyle = block_math.or(inline_math);
-var element = literals.or(comment).or(mathstyle).or(inline_elem);
-var double_backslash = string("\\\\");
-var section = double_backslash.or(element).plus();
-var unknown_macro = macro_head.map((x) => "\\" + x);
-var spectrum = element.or(unknown_macro);
-var text = spectrum.plus();
-var parse3 = (s) => ((x) => x.type != "error" ? x.res : "")(text.parse(s.toIterator()));
-var fixeds = () => Object.keys(fixed_default);
-var unaries = () => Object.keys(unary_default);
-var binaries = () => Object.keys(binary_default);
+var createTranslator = ({
+  fixed: fixed2 = {},
+  fixedInfixes = [],
+  unary = {},
+  unaryOptional = {},
+  unaryTypefaceNames = [],
+  binary = {},
+  binaryInfix = {},
+  binaryBlock = {},
+  environment = {},
+  emptyBlock,
+  createBlock,
+  concatBlock,
+  displayBlock,
+  subscriptHandler,
+  supscriptHandler,
+  typefaceHandler
+}) => {
+  const single = digit.or(letter).or(valuesymbol).or(of(() => fixed_macro));
+  const value = loose(single.or(brace_wrap(of(() => text))));
+  const optional = bracket_wrap(value);
+  const symbol_macros = includes(...'|,>:;!()[]{}_%\\`^~=."\'');
+  const macro_name = letters.or(symbol_macros);
+  const macro_head = backslash.move(macro_name);
+  const fixed_macro = macro_head.assume((x) => (x in fixed2)).map((s) => fixed2[s]);
+  const unary_ordinary_macro = macro_head.assume((x) => (x in unary)).follow(value).map(([name, arg1]) => unary[name](arg1));
+  const unary_optional_macro = macro_head.assume((x) => !!unaryOptional[x]).follow2(optional, value).map(([[name, opt1], arg1]) => unaryOptional[name](opt1, arg1));
+  const unary_macro = unary_optional_macro.or(unary_ordinary_macro);
+  const binary_macro = macro_head.assume((x) => !!binary[x]).follow2(value, value).map(([[name, arg1], arg2]) => binary[name](arg1, arg2));
+  const infix_macro = value.follow(macro_head.assume((x) => !!binaryInfix[x])).follow(value).map((xs) => binary[xs[0][1]](xs[0][0], xs[1]));
+  const braced_letters = brace_wrap(letters);
+  const begin = backslash.skip(string("begin")).move(braced_letters);
+  const end = backslash.skip(string("end")).move(braced_letters);
+  const environ = begin.follow(of(() => section)).follow(end).assume((xs) => xs[0][0] == xs[1]).map((xs) => environment[xs[1]](xs[0][1]));
+  const supscript = character("^").move(value).map(supscriptHandler);
+  const subscript = character("_").move(value).map(subscriptHandler);
+  const sup_or_sub = supscript.or(subscript);
+  const comment = character("%").skip(token((x) => x != "\n").asterisk()).skip(character("\n")).map(() => "");
+  const typeface2 = macro_head.assume((x) => unaryTypefaceNames.includes(x)).follow(value).map(([name, arg1]) => unary[name](arg1));
+  const inline_elem = literals.or(sup_or_sub).or(environ).or(unary_macro).or(binary_macro).or(value);
+  const italic_render = (s) => typefaceHandler("mathit", s);
+  const inline_cluster = typeface2.or(inline_elem.map(italic_render)).plus();
+  const dollar = character("$");
+  const inline_math = dollar.move(inline_cluster).skip(dollar);
+  const block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => fixedInfixes.includes(x)).map((x) => fixed2[x])).map((s) => createBlock(` ${s} `));
+  const block_value = loose(single.map(createBlock).or(brace_wrap(of(() => block_cluster))));
+  const block_binary_macro = macro_head.assume((x) => !!binaryBlock[x]).follow2(block_value, block_value).map((xs) => binaryBlock[xs[0][0]](xs[0][1], xs[1]));
+  const block_elem = loose(block_infix).or(block_value).or(sup_or_sub.map(createBlock)).or(fixed_macro.map(createBlock)).or(unary_macro.map(createBlock)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => emptyBlock));
+  const block_cluster = block_elem.some().map((xs) => xs.reduce(concatBlock));
+  const double_dollar = string("$$");
+  const block_math = double_dollar.move(block_cluster.map(displayBlock)).skip(double_dollar);
+  const mathstyle = block_math.or(inline_math);
+  const element = literals.or(comment).or(mathstyle).or(inline_elem);
+  const double_backslash = string("\\\\");
+  const section = double_backslash.or(element).plus();
+  const unknown_macro = macro_head.map((x) => "\\" + x);
+  const spectrum = element.or(unknown_macro);
+  const text = spectrum.plus();
+  const translate = (s) => ((x) => x.type != "error" ? x.res : "")(text.parse(s.toIterator()));
+  return translate;
+};
+
+// src/impl/unicode/environment.ts
+var Environment = {
+  matrix: (s) => separateMatrix(s, " ", " ", "; "),
+  smallmatrix: (s) => separateMatrix(s, " ", " ", "; "),
+  bmatrix: (s) => regularMatrix(s, "[", "]"),
+  pmatrix: (s) => regularMatrix(s, "(", ")"),
+  vmatrix: (s) => separateMatrix(s, "|", "|", "; "),
+  Bmatrix: (s) => regularMatrix(s, "{", "}"),
+  Vmatrix: (s) => separateMatrix(s, "||", "||", "; "),
+  proposition: (s) => theorem_style("proposition", s),
+  lemma: (s) => theorem_style("lemma", s),
+  theorem: (s) => theorem_style("theorem", s),
+  corollary: (s) => theorem_style("corollary", s),
+  definition: (s) => theorem_style("definition", s),
+  remark: (s) => theorem_style("remark", s),
+  hypothesis: (s) => theorem_style("hypothesis", s),
+  conjecture: (s) => theorem_style("conjecture", s),
+  axiom: (s) => theorem_style("axiom", s),
+  example: (s) => theorem_style("example", s),
+  proof: (s) => theorem_style("proof", s)
+};
+var doubleBackslash = "\\\\";
+var matrixM = (s) => s.replace(/\s/g, "").replace(/&/g, " ");
+var regularMatrix = function(matrix, leftSymbol, rightSymbol, leftGlobalSymbol = leftSymbol, rightGlobalSymbol = rightSymbol) {
+  const xs = matrix.split(doubleBackslash);
+  const s = "".concat(...xs.map((s2) => leftSymbol + matrixM(s2) + rightSymbol));
+  return xs.length > 1 ? leftGlobalSymbol + s + rightGlobalSymbol : s;
+};
+var separateMatrix = function(matrix, leftGlobalSymbol, rightGlobalSymbol, separator) {
+  const xs = matrix.split(doubleBackslash);
+  return leftGlobalSymbol + xs.map(matrixM).join(separator) + rightGlobalSymbol;
+};
+var polymerize_tex = function(s) {
+  let result = s.trim().replace(/ *\r\n *| *\n *| (?= )/g, "").replace(/ *(,|\.) */g, "$1 ");
+  return result;
+};
+var regexpDoubleLine = /\r\n\r\n|\n\n/;
+var theorem_style = function(type, content) {
+  let title = fixed_default[type] + ". ";
+  return title + content.split(regexpDoubleLine).map(polymerize_tex).join("\n");
+};
+var environment_default = Environment;
+
+// src/impl/unicode.ts
+var translate = createTranslator({
+  fixed: fixed_default,
+  fixedInfixes: FixedInfixes,
+  unary: unary_default,
+  unaryOptional: UnaryOptional,
+  unaryTypefaceNames: UnaryTypefaceNames,
+  binary: binary_default,
+  binaryInfix: BinaryInfix,
+  binaryBlock: BinaryBlock,
+  environment: environment_default,
+  emptyBlock: block_default.empty,
+  createBlock: block_default.of,
+  concatBlock: (a, b) => a.append(b),
+  displayBlock: (a) => a.display,
+  subscriptHandler: unicode_table_default.subrender,
+  supscriptHandler: unicode_table_default.suprender,
+  typefaceHandler: unicode_table_default.render_if_exists
+});
+
+// unitex.ts
 var UniTeX = {
-  parse: parse3,
-  fixeds,
-  unaries,
-  binaries
+  parse: translate,
+  fixed: fixed_default,
+  unary: unary_default,
+  binary: binary_default
 };
 export {
   UniTeX
