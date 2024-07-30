@@ -1,57 +1,95 @@
-// src/utils/proper.js
-var should_wrap = (x) => x.charAt() == "-" ? should_wrap(x.substring(1)) : x.length <= 1;
-var Proper = {};
-Proper.wrap = (ls, rs) => (x) => should_wrap(x) ? x : `${ls}${x}${rs}`;
-Proper.paren = Proper.wrap("(", ")");
-Proper.bracket = Proper.wrap("[", "]");
-Proper.brace = Proper.wrap("{", "}");
+// src/utils/proper.ts
+var shouldWrap = (x) => x.charAt(0) == "-" ? shouldWrap(x.substring(1)) : x.length <= 1;
+var Proper;
+((Proper) => {
+  Proper.wrap = (ls, rs) => (x) => shouldWrap(x) ? x : `${ls}${x}${rs}`;
+  Proper.paren = Proper.wrap("(", ")");
+  Proper.bracket = Proper.wrap("[", "]");
+  Proper.brace = Proper.wrap("{", "}");
+})(Proper ||= {});
 var proper_default = Proper;
 
-// src/utils/unicode.js
-var boundedIn = (s, a, b) => {
-  const [code, min, max] = [s, a, b].map((x) => x.codePointAt(0));
-  if (!code || !min || !max)
-    return false;
-  return min <= code && code <= max;
+// src/string-iterator.ts
+class StringIterator {
+  source;
+  index;
+  constructor(source, index) {
+    this.source = source;
+    this.index = index;
+  }
+  extract(pos) {
+    const end = typeof pos == "number" ? pos : pos.index;
+    return this.source.substring(this.index, end);
+  }
+  hasNext() {
+    return this.index < this.source.length;
+  }
+  curr() {
+    return this.source.charAt(this.index);
+  }
+  next() {
+    return new StringIterator(this.source, this.index + 1);
+  }
+  forward(length) {
+    return new StringIterator(this.source, this.index + length);
+  }
+}
+
+// src/declare-global.ts
+Number.prototype.boundedIn = function(a, b) {
+  return a <= this && this <= b;
 };
+String.prototype.boundedIn = function(a, b) {
+  const [code, start, end] = [this, a, b].map((s) => s.codePointAt(0));
+  return code.boundedIn(start, end);
+};
+String.prototype.toIterator = function() {
+  return new StringIterator(this, 0);
+};
+
+// src/utils/unicode.ts
 var Unicode = {
   typeface: {},
-  isLetter: (x) => boundedIn(x, "a", "z") || boundedIn(x, "A", "Z"),
-  series: function(a, b) {
+  isLetter: (s) => s.boundedIn("a", "z") || s.boundedIn("A", "Z"),
+  series: (a, b) => {
     let [start, end] = [a.codePointAt(0), b.codePointAt(0)];
     let length = end - start + 1;
     let codes = Array.from({ length }, (_, x) => x + start);
     return String.fromCodePoint(...codes);
   },
-  alphabets: function() {
-    let map = new Object;
-    Unicode.letterArray.forEach((x, i) => map[x] = arguments[i]);
+  alphabets: (...table) => {
+    let map = Object.create(null);
+    Unicode["letterArray"].forEach((x, i) => map[x] = table[i]);
     return map;
   },
-  block: function(a, b, names) {
+  block: (a, b, names) => {
     let map = new Object;
     let data = Unicode.series(a, b);
     names.forEach((name, i) => name && (map[name] = data[i]));
     return map;
   },
   render_if_exists: (s, name) => Array.from(s).map((x) => Unicode.typeface[name][x] || x).join(""),
-  render_if_forall: function(charset, str, otherwise = (x) => x) {
+  render_if_forall: (charset, str, otherwise = (x) => x) => {
     const array = Array.from(str);
     let through = true;
     for (const element of array)
-      through &&= charset[element];
+      through &&= !!charset[element];
     return through ? array.map((x) => charset[x]).join("") : otherwise(str);
   },
-  suprender: (s) => Unicode.render_if_forall(Unicode.supscripts, s, (x) => "^" + proper_default.brace(x)),
-  subrender: (s) => Unicode.render_if_forall(Unicode.subscripts, s, (x) => "_" + proper_default.brace(x))
+  typefaceNames: [],
+  suprender: (s) => Unicode.render_if_forall(Unicode["supscripts"], s, (x) => "^" + proper_default.brace(x)),
+  subrender: (s) => Unicode.render_if_forall(Unicode["subscripts"], s, (x) => "_" + proper_default.brace(x)),
+  supscripts: {},
+  subscripts: {},
+  greeks: {}
 };
-Unicode.letterUppers = Unicode.series("A", "Z");
-Unicode.letterLowers = Unicode.series("a", "z");
-Unicode.letters = Unicode.letterUppers + Unicode.letterLowers;
-Unicode.letterArray = Array.from(Unicode.letters);
-Unicode.greekUppers = Unicode.series("\u0391", "\u03A1") + Unicode.series("\u03A3", "\u03A9");
-Unicode.greekLowers = Unicode.series("\u03B1", "\u03C1") + Unicode.series("\u03C3", "\u03C9");
-Unicode.greeks = Unicode.greekUppers + Unicode.greekLowers;
+Unicode["letterUppers"] = Unicode.series("A", "Z");
+Unicode["letterLowers"] = Unicode.series("a", "z");
+Unicode["letters"] = Unicode["letterUppers"] + Unicode["letterLowers"];
+Unicode["letterArray"] = Array.from(Unicode["letters"]);
+Unicode["greekUppers"] = Unicode.series("\u0391", "\u03A1") + Unicode.series("\u03A3", "\u03A9");
+Unicode["greekLowers"] = Unicode.series("\u03B1", "\u03C1") + Unicode.series("\u03C3", "\u03C9");
+Unicode["greeks"] = Unicode["greekUppers"] + Unicode["greekLowers"];
 var series = Unicode.series;
 var alphabets = Unicode.alphabets;
 var typeface = function(name, alphabet) {
@@ -60,7 +98,7 @@ var typeface = function(name, alphabet) {
 typeface("mathbb", alphabets(..."\uD835\uDD38\uD835\uDD39\u2102", ...series("\uD835\uDD3B", "\uD835\uDD3E"), "\u210D", ...series("\uD835\uDD40", "\uD835\uDD44"), ..."\u2115\uD835\uDD46\u2119\u211A\u211D", ...series("\uD835\uDD4A", "\uD835\uDD50"), "\u2124", ...series("\uD835\uDD52", "\uD835\uDD6B")));
 typeface("mathfrak", alphabets(...series("\uD835\uDD6C", "\uD835\uDD9F")));
 typeface("mathscr", alphabets(..."\uD835\uDC9C\u212C\uD835\uDC9E\uD835\uDC9F\u2130\u2131\uD835\uDCA2\u210B\u2110\uD835\uDCA5\uD835\uDCA6\u2112\u2133", ...series("\uD835\uDCA9", "\uD835\uDCAC"), "\u211B", ...series("\uD835\uDCAE", "\uD835\uDCB9"), "\u212F", "\uD835\uDCBB", "g", ...series("\uD835\uDCBD", "\uD835\uDCC3"), "\u2134", ...series("\uD835\uDCC5", "\uD835\uDCCF")));
-typeface("mathcal", Unicode.typeface.mathscr);
+typeface("mathcal", Unicode.typeface["mathscr"]);
 typeface("mathbf", alphabets(...series("\uD835\uDC00", "\uD835\uDC33")));
 typeface("mathit", alphabets(...series("\uD835\uDC34", "\uD835\uDC54"), "h", ...series("\uD835\uDC56", "\uD835\uDC67")));
 typeface("mathsf", alphabets(...series("\uD835\uDDA0", "\uD835\uDDD3")));
@@ -81,7 +119,6 @@ typeface("frak", Unicode.typeface.mathfrak);
 typeface("cal", Unicode.typeface.mathcal);
 typeface("Bbb", Unicode.typeface.mathbb);
 Unicode.typefaceNames = Object.keys(Unicode.typeface);
-Unicode.supscripts = {};
 Unicode.supscripts[0] = "\u2070";
 Unicode.supscripts[1] = "\xB9";
 Unicode.supscripts[2] = "\xB2";
@@ -135,7 +172,6 @@ Unicode.supscripts.M = "\u1D39";
 Unicode.supscripts.N = "\u1D3A";
 Unicode.supscripts["\u03B1"] = "\u1D45";
 Unicode.supscripts["\u2032"] = "\u2032";
-Unicode.subscripts = {};
 ["\u2080", "\u2081", "\u2082", "\u2083", "\u2084", "\u2085", "\u2086", "\u2087", "\u2088", "\u2089"].forEach((x, i) => Unicode.subscripts[i] = x);
 Unicode.subscripts.a = "\u2090";
 Unicode.subscripts.e = "\u2091";
@@ -161,7 +197,7 @@ Unicode.subscripts["("] = "\u208D";
 Unicode.subscripts[")"] = "\u208E";
 var unicode_default = Unicode;
 
-// src/utils/block.js
+// src/utils/block.ts
 var desired_length_string = function(s, n) {
   const residue = n - s.length;
   if (residue === 0)
@@ -175,65 +211,55 @@ var desired_length_string = function(s, n) {
 };
 
 class Block {
+  width;
+  height;
+  data;
+  display;
+  baseline;
   constructor(data, baseline = 0) {
     this.width = Math.max(...data.map((x) => x.length));
     this.height = data.length;
     this.data = data.map((x) => desired_length_string(x, this.width));
-    this.string = this.data.join("\n");
+    this.display = this.data.join("\n");
     this.baseline = baseline;
-    this.blocklift = function(n, offset) {
-      const residue = n - this.height;
-      if (residue == 0)
-        return this;
-      const topline = Array(offset).fill("");
-      const bottomline = Array(residue - offset).fill("");
-      return new Block(topline.concat(this.data).concat(bottomline));
-    };
-    this.append = function(block) {
-      const major = this.height > block.height;
-      const supbase = this.baseline > block.baseline;
-      const offset = supbase ? this.baseline - block.baseline : block.baseline - this.baseline;
-      const baseline2 = supbase ? this.baseline : block.baseline;
-      const [left, right] = major ? [this.data, block.blocklift(this.height, offset).data] : [this.blocklift(block.height, offset).data, block.data];
-      return new Block(left.map((v, i) => v + right[i]), baseline2);
-    };
-    this.add = (block) => this.append(Block.plus).append(block);
-    this.over = function(block) {
-      const width = Math.max(this.width, block.width) + 2;
-      const fracline = "-".repeat(width);
-      const data2 = [...this.data, fracline, ...block.data];
-      return new Block(data2.map((x) => desired_length_string(x, width)), this.height);
-    };
   }
-  static of(s) {
-    return s.toBlock();
+  adjustHeight(n, offset) {
+    const residue = n - this.height;
+    if (residue == 0) {
+      return this;
+    }
+    const topLine = Array(offset).fill("");
+    const bottomLine = Array(residue - offset).fill("");
+    return new Block(topLine.concat(this.data).concat(bottomLine));
+  }
+  append(block) {
+    const isHigher = this.height > block.height;
+    const isGreat = this.baseline > block.baseline;
+    const [offset, baseline] = isGreat ? [this.baseline - block.baseline, this.baseline] : [block.baseline - this.baseline, block.baseline];
+    const [left, right] = isHigher ? [this.data, block.adjustHeight(this.height, offset).data] : [this.adjustHeight(block.height, offset).data, block.data];
+    return new Block(left.map((v, i) => v + right[i]), baseline);
+  }
+  add = (block) => this.append(Block.plus).append(block);
+  over(block) {
+    const width = Math.max(this.width, block.width) + 2;
+    const fracline = "-".repeat(width);
+    const data = [...this.data, fracline, ...block.data];
+    return new Block(data.map((x) => desired_length_string(x, width)), this.height);
+  }
+  static of = (s) => new Block([s]);
+  static empty = Block.of("");
+  static plus = Block.of(" + ");
+  static fromStrings(p, q) {
+    const width = Math.max(p.length, q.length) + 2;
+    const desired_p = desired_length_string(p, width);
+    const desired_q = desired_length_string(q, width);
+    const data = [desired_p, "-".repeat(width), desired_q];
+    return new Block(data, 1);
+  }
+  static frac(a, b) {
+    return a instanceof Block && b instanceof Block ? a.over(b) : typeof a == "string" && typeof b == "string" ? Block.fromStrings(a, b) : typeof a == "string" ? Block.frac(Block.of(a), b) : Block.frac(a, Block.of(b));
   }
 }
-String.prototype.toBlock = function() {
-  return new Block([this]);
-};
-Block.empty = "".toBlock();
-Block.plus = " + ".toBlock();
-var fracByString = function(x, y) {
-  const width = Math.max(x.length, y.length) + 2;
-  const data = [x.fill(width), "-".repeat(width), y.fill(width)];
-  return new Block(data, 1);
-};
-var frac = function(a, b) {
-  if (a instanceof Block && b instanceof Block)
-    return a.over(b);
-  if (typeof a == "string" && typeof b == "string")
-    return fracByString(a, b);
-  if (typeof a == "string")
-    return frac(new Block([a]), b);
-  if (typeof b == "string")
-    return frac(a, new Block([b]));
-};
-Block.frac = frac;
-String.prototype.add = function(x) {
-  const other = typeof x == "string" ? x.toBlock() : x;
-  return this.toBlock().add(other);
-};
 var block_default = Block;
 
 // src/macro/fixed.ts
@@ -945,7 +971,7 @@ unicode_default.subscripts[Fixed.in] = Fixed.smallin;
 unicode_default.subscripts[Fixed.ni] = Fixed.smallni;
 var fixed_default = Fixed;
 
-// src/macro/binary.js
+// src/macro/binary.ts
 var oversetEquationMap = {
   "?=": fixed_default.qeq,
   "m=": fixed_default.meq,
@@ -961,7 +987,7 @@ var Binary = {
 };
 var BinaryBlock = {
   frac: (x, y) => block_default.frac(x, y),
-  overset: (x, y) => Binary.overset(x.string, y.string).toBlock()
+  overset: (x, y) => block_default.of(Binary.overset(x.display, y.display))
 };
 var BinaryInfix = {
   choose: (n, k) => Binary.binom(n, k)
@@ -1017,7 +1043,7 @@ var UnaryOptional = {
       case 4:
         return Unary.furt(x);
       default:
-        return unicode_default.suprender(n) + Unary.sqrt(x);
+        return unicode_default.suprender(`${n}`) + Unary.sqrt(x);
     }
   }
 };
@@ -1027,37 +1053,37 @@ for (const key of ["mkern", "mskip", "hskip", "hspace"]) {
 unicode_default.typefaceNames.forEach((x) => Unary[x] = (s) => unicode_default.render_if_exists(s, x));
 var UnaryTypefaceNames = ["text", "mathrm", ...unicode_default.typefaceNames];
 
-// src/macro/environment.js
+// src/macro/environment.ts
 var Environment = {
-  matrix: (xs) => sepMatrix(xs, " ", " ", "; "),
-  smallmatrix: (xs) => sepMatrix(xs, " ", " ", "; "),
-  bmatrix: (xs) => regMatrix(xs, "[", "]"),
-  pmatrix: (xs) => regMatrix(xs, "(", ")"),
-  vmatrix: (xs) => sepMatrix(xs, "|", "|", "; "),
-  Bmatrix: (xs) => regMatrix(xs, "{", "}"),
-  Vmatrix: (xs) => sepMatrix(xs, "||", "||", "; "),
-  proposition: (xs) => theorem_style("proposition", xs),
-  lemma: (xs) => theorem_style("lemma", xs),
-  theorem: (xs) => theorem_style("theorem", xs),
-  corollary: (xs) => theorem_style("corollary", xs),
-  definition: (xs) => theorem_style("definition", xs),
-  remark: (xs) => theorem_style("remark", xs),
-  hypothesis: (xs) => theorem_style("hypothesis", xs),
-  conjecture: (xs) => theorem_style("conjecture", xs),
-  axiom: (xs) => theorem_style("axiom", xs),
-  example: (xs) => theorem_style("example", xs),
-  proof: (xs) => theorem_style("proof", xs)
+  matrix: (s) => separateMatrix(s, " ", " ", "; "),
+  smallmatrix: (s) => separateMatrix(s, " ", " ", "; "),
+  bmatrix: (s) => regularMatrix(s, "[", "]"),
+  pmatrix: (s) => regularMatrix(s, "(", ")"),
+  vmatrix: (s) => separateMatrix(s, "|", "|", "; "),
+  Bmatrix: (s) => regularMatrix(s, "{", "}"),
+  Vmatrix: (s) => separateMatrix(s, "||", "||", "; "),
+  proposition: (s) => theorem_style("proposition", s),
+  lemma: (s) => theorem_style("lemma", s),
+  theorem: (s) => theorem_style("theorem", s),
+  corollary: (s) => theorem_style("corollary", s),
+  definition: (s) => theorem_style("definition", s),
+  remark: (s) => theorem_style("remark", s),
+  hypothesis: (s) => theorem_style("hypothesis", s),
+  conjecture: (s) => theorem_style("conjecture", s),
+  axiom: (s) => theorem_style("axiom", s),
+  example: (s) => theorem_style("example", s),
+  proof: (s) => theorem_style("proof", s)
 };
 var doubleBackslash = "\\\\";
-var matrim = (x) => x.replace(/\s/g, "").replace(/&/g, " ");
-var regMatrix = function(gel, ls, rs, lg = ls, rg = rs) {
-  const xs = gel.split(doubleBackslash);
-  const s = "".concat(...xs.map((x) => ls + matrim(x) + rs));
-  return xs.length > 1 ? lg + s + rg : s;
+var matrixM = (s) => s.replace(/\s/g, "").replace(/&/g, " ");
+var regularMatrix = function(matrix, leftSymbol, rightSymbol, leftGlobalSymbol = leftSymbol, rightGlobalSymbol = rightSymbol) {
+  const xs = matrix.split(doubleBackslash);
+  const s = "".concat(...xs.map((s2) => leftSymbol + matrixM(s2) + rightSymbol));
+  return xs.length > 1 ? leftGlobalSymbol + s + rightGlobalSymbol : s;
 };
-var sepMatrix = function(gel, lg, rg, sep) {
-  const xs = gel.split(doubleBackslash);
-  return lg + xs.map(matrim).join(sep) + rg;
+var separateMatrix = function(matrix, leftGlobalSymbol, rightGlobalSymbol, separator) {
+  const xs = matrix.split(doubleBackslash);
+  return leftGlobalSymbol + xs.map(matrixM).join(separator) + rightGlobalSymbol;
 };
 var polymerize_tex = function(s) {
   let result = s.trim().replace(/ *\r\n *| *\n *| (?= )/g, "").replace(/ *(,|\.) */g, "$1 ");
@@ -1069,32 +1095,6 @@ var theorem_style = function(type, content) {
   return title + content.split(regexpDoubleLine).map(polymerize_tex).join("\n");
 };
 var environment_default = Environment;
-
-// src/string-iterator.ts
-class StringIterator {
-  source;
-  index;
-  constructor(source, index) {
-    this.source = source;
-    this.index = index;
-  }
-  extract(pos) {
-    const end = typeof pos == "number" ? pos : pos.index;
-    return this.source.substring(this.index, end);
-  }
-  hasNext() {
-    return this.index < this.source.length;
-  }
-  curr() {
-    return this.source.charAt(this.index);
-  }
-  next() {
-    return new StringIterator(this.source, this.index + 1);
-  }
-  forward(length) {
-    return new StringIterator(this.source, this.index + length);
-  }
-}
 
 // src/parse.ts
 var success = (pos, res) => ({ type: "success", pos, res });
@@ -1113,9 +1113,6 @@ var Flat;
   Flat.anyChar = (it) => it.hasNext() ? success(it.next(), it.curr()) : error(it, unexpectedEndOfInput);
   Flat.pchar = (c) => Flat.attempt(bind(Flat.anyChar, (u) => u == c ? pure(c) : fail(`expected: ${c}`)));
 })(Flat ||= {});
-String.prototype.toIterator = function() {
-  return new StringIterator(this, 0);
-};
 
 // src/lazy.ts
 var of = (run) => ({ type: "lazy", run });
@@ -1222,131 +1219,6 @@ var digit = token((c) => c.boundedIn("0", "9"));
 var digits = digit.plus();
 var letter = token((c) => c.boundedIn("a", "z") || c.boundedIn("A", "Z"));
 var letters = letter.plus();
-Number.prototype.boundedIn = function(a, b) {
-  return a <= this && this <= b;
-};
-String.prototype.boundedIn = function(a, b) {
-  return this.codePointAt(0).boundedIn(a.codePointAt(0), b.codePointAt(0));
-};
-
-// src/context/extension.js
-var ExtensionLoader = {
-  load: function(extension) {
-    const { fixed: fixed4, unary: unary2, binary: binary2 } = extension;
-    fixed4 && Object.keys(fixed4).forEach((x) => fixed_default[x] = fixed4[x]);
-    unary2 && Object.keys(unary2).forEach((x) => unary_default[x] = unary2[x]);
-    binary2 && Object.keys(binary2).forEach((x) => binary_default[x] = binary2[x]);
-  },
-  loadHttpResponse: function(link2) {
-    if (XMLHttpRequest != null) {
-      var xmlhttp = new XMLHttpRequest;
-      xmlhttp.open("GET", link2, false);
-      xmlhttp.send();
-      if (xmlhttp.status == 200)
-        ExtensionLoader.load(xmlhttp.responseText);
-    }
-  }
-};
-
-// src/context/extensions/unimath.js
-var unimath = {
-  title: "unimath",
-  description: "mathematics unicode extension",
-  fixed: {
-    napprox: "\u2249",
-    stareq: "\u225B",
-    deltaeq: "\u225C",
-    meq: "\u225E",
-    defeq: "\u225D",
-    qeq: "\u225F",
-    questeq: "\u225F",
-    arceq: "\u2258",
-    wedgeq: "\u2259",
-    veeeq: "\u225A",
-    circeq: "\u2257",
-    increment: "\u2206",
-    smallin: "\u220A",
-    smallni: "\u220D",
-    division: "\u2215",
-    cint: "\u2231",
-    ccint: "\u2232",
-    accint: "\u2233",
-    overa: "\u0363",
-    overe: "\u0364",
-    overi: "\u0365",
-    overo: "\u0366",
-    overu: "\u0367",
-    overc: "\u0368",
-    overd: "\u0369",
-    overh: "\u036A",
-    overm: "\u036B",
-    overr: "\u036C",
-    overt: "\u036E",
-    overx: "\u036F"
-  },
-  unary: {}
-};
-
-// src/context/extensions/shorthand.js
-var autoFirstLetterUppercase = function(fixeds) {
-  Object.keys(fixeds).forEach(function(name) {
-    shorthand.fixed[name] = fixeds[name];
-    const [upperName, upperValue] = [name, fixeds[name]].map((x) => x.charAt(0).toUpperCase() + x.substring(1));
-    shorthand.fixed[upperName] = upperValue;
-  });
-};
-var shorthand = {
-  title: "shorthand",
-  description: "shorthand tex",
-  fixed: {}
-};
-autoFirstLetterUppercase({
-  wlog: "without loss of generality",
-  walog: "without any loss of generality",
-  tfae: "the following are equivalent"
-});
-
-// src/context/extensions/hyper.js
-var hyper = {
-  title: "hyper",
-  description: "text processor extension",
-  unary: {
-    length: (s) => s.length,
-    lower: (s) => s.toLowerCase(),
-    upper: (s) => s.toUpperCase()
-  },
-  binary: {
-    repeat: (s, n) => s.repeat(n)
-  }
-};
-
-// src/context/context.js
-var Context = {
-  minimal: {
-    title: "minimal",
-    enableDefaultValueIdentity: true,
-    extensions: [],
-    language: "en-US",
-    target: "latex"
-  },
-  standard: {
-    title: "standard",
-    enableDefaultValueIdentity: true,
-    extensions: [unimath, shorthand, hyper],
-    language: "en-US"
-  }
-};
-var context_default = Context;
-var ensureContextNonNull = (x) => x || Context.standard;
-Context.use = function(context = Context.standard) {
-  typeof context == "string" && (context = Context[context]);
-  return context ? context.extensions.forEach((x) => ExtensionLoader.load(x)) : context;
-};
-unary_default.usecontext = (x) => (Context.use(x), "");
-Context.getContext = function() {
-  return ensureContextNonNull(Context.current);
-};
-Context.use();
 
 // unitex.ts
 var backslash = character("\\");
@@ -1371,8 +1243,8 @@ var fixed_macro = macro_head.assume((x) => (x in fixed_default)).map((s) => fixe
 var unary_ordinary_macro = macro_head.assume((x) => (x in unary_default)).follow(value).map(([name, arg1]) => unary_default[name](arg1));
 var unary_optional_macro = macro_head.assume((x) => UnaryOptional[x]).follow2(optional, value).map(([[name, opt1], arg1]) => UnaryOptional[name](opt1, arg1));
 var unary_macro = unary_optional_macro.or(unary_ordinary_macro);
-var binary_macro = macro_head.assume((x) => binary_default[x]).follow2(value, value).map(([[name, arg1], arg2]) => binary_default[name](arg1, arg2));
-var infix_macro = value.follow(macro_head.assume((x) => BinaryInfix[x])).follow(value).map((xs) => binary_default[xs[0][1]](xs[0][0], xs[1]));
+var binary_macro = macro_head.assume((x) => !!binary_default[x]).follow2(value, value).map(([[name, arg1], arg2]) => binary_default[name](arg1, arg2));
+var infix_macro = value.follow(macro_head.assume((x) => !!BinaryInfix[x])).follow(value).map((xs) => binary_default[xs[0][1]](xs[0][0], xs[1]));
 var braced_letters = brace_wrap(letters);
 var begin = backslash.skip(string("begin")).move(braced_letters);
 var end = backslash.skip(string("end")).move(braced_letters);
@@ -1393,7 +1265,7 @@ var block_binary_macro = macro_head.assume((x) => BinaryBlock[x]).follow2(block_
 var block_elem = loose(block_infix).or(block_value).or(suporsub.map(block_default.of)).or(fixed_macro.map(block_default.of)).or(unary_macro.map(block_default.of)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => block_default.empty));
 var block_cluster = block_elem.some().map((x) => x.reduce((s, t) => s.append(t)));
 var double_dollar = string("$$");
-var block_math = double_dollar.move(block_cluster.map((x) => x.string)).skip(double_dollar);
+var block_math = double_dollar.move(block_cluster.map((x) => x.display)).skip(double_dollar);
 var mathstyle = block_math.or(inline_math);
 var element = literals.or(comment).or(mathstyle).or(inline_elem);
 var double_backslash = string("\\\\");
@@ -1405,13 +1277,11 @@ var parse3 = (s) => ((x) => x.type != "error" ? x.res : "")(text.parse(s.toItera
 var fixeds = () => Object.keys(fixed_default);
 var unaries = () => Object.keys(unary_default);
 var binaries = () => Object.keys(binary_default);
-var getContext = () => context_default.getContext();
 var UniTeX = {
   parse: parse3,
   fixeds,
   unaries,
-  binaries,
-  getContext
+  binaries
 };
 export {
   UniTeX
