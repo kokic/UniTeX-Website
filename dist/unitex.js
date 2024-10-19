@@ -874,17 +874,10 @@ var fixed_default = Fixed;
 
 // src/impl/unicode/unary.ts
 var unchecked_accents = (unicode) => (x) => `${x}${unicode}`;
-var unicode_convert = (codepoint) => {
-  const head = codepoint.charAt(0);
-  const base = head == `"` ? 16 : head == `'` ? 8 : 10;
-  const code = base == 10 ? codepoint : codepoint.substring(1);
-  return String.fromCodePoint(parseInt(code, base));
-};
 var Unary = {
   id: (x) => x,
   text: (x) => x,
   mathrm: (x) => x,
-  codesymbol: unicode_convert,
   sqrt: (x) => "\u221A" + proper_default.paren(x),
   cbrt: (x) => "\u221B" + proper_default.paren(x),
   furt: (x) => "\u221C" + proper_default.paren(x),
