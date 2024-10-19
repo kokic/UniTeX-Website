@@ -884,7 +884,7 @@ var Unary = {
   id: (x) => x,
   text: (x) => x,
   mathrm: (x) => x,
-  symbol: unicode_convert,
+  codesymbol: unicode_convert,
   sqrt: (x) => "\u221A" + proper_default.paren(x),
   cbrt: (x) => "\u221B" + proper_default.paren(x),
   furt: (x) => "\u221C" + proper_default.paren(x),
