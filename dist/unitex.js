@@ -624,6 +624,10 @@ var stableFixed = {
   aleph: "\u2135",
   alef: "\u2135",
   alefsym: "\u2135",
+  beth: "\u2136",
+  gimel: "\u2137",
+  daleth: "\u2138",
+  eth: "\xF0",
   ell: "\u2113",
   wp: "\u2118",
   weierp: "\u2118",
@@ -870,10 +874,17 @@ var fixed_default = Fixed;
 
 // src/impl/unicode/unary.ts
 var unchecked_accents = (unicode) => (x) => `${x}${unicode}`;
+var unicode_convert = (codepoint) => {
+  const head = codepoint.charAt(0);
+  const base = head == `"` ? 16 : head == `'` ? 8 : 10;
+  const code = base == 10 ? codepoint : codepoint.substring(1);
+  return String.fromCodePoint(parseInt(code, base));
+};
 var Unary = {
   id: (x) => x,
   text: (x) => x,
   mathrm: (x) => x,
+  symbol: unicode_convert,
   sqrt: (x) => "\u221A" + proper_default.paren(x),
   cbrt: (x) => "\u221B" + proper_default.paren(x),
   furt: (x) => "\u221C" + proper_default.paren(x),
@@ -1040,8 +1051,8 @@ var run = (val) => ("type" in val) && val.type == "lazy" ? val.run() : val;
 // src/parsec/combinator.ts
 class Parser {
   parse;
-  constructor(parse2) {
-    this.parse = parse2;
+  constructor(parse) {
+    this.parse = parse;
   }
   many() {
     return new Parser((it) => {
@@ -1191,7 +1202,7 @@ var literals = literal.plus();
 var solid = (s) => s.trim().length == 1;
 var valuesymbol = literal.assume(solid);
 var createTranslator = ({
-  fixed: fixed2 = {},
+  fixed = {},
   fixedInfixes = [],
   unary = {},
   unaryOptional = {},
@@ -1214,7 +1225,7 @@ var createTranslator = ({
   const symbol_macros = includes(...'|,>:;!()[]{}_%\\`^~=."\'');
   const macro_name = letters.or(symbol_macros);
   const macro_head = backslash.move(macro_name);
-  const fixed_macro = macro_head.assume((x) => (x in fixed2)).map((s) => fixed2[s]);
+  const fixed_macro = macro_head.assume((x) => (x in fixed)).map((s) => fixed[s]);
   const unary_ordinary_macro = macro_head.assume((x) => (x in unary)).follow(value).map(([name, arg1]) => unary[name](arg1));
   const unary_optional_macro = macro_head.assume((x) => !!unaryOptional[x]).follow2(optional, value).map(([[name, opt1], arg1]) => unaryOptional[name](opt1, arg1));
   const unary_macro = unary_optional_macro.or(unary_ordinary_macro);
@@ -1234,7 +1245,7 @@ var createTranslator = ({
   const inline_cluster = typeface2.or(inline_elem.map(italic_render)).plus();
   const dollar = character("$");
   const inline_math = dollar.move(inline_cluster).skip(dollar);
-  const block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => fixedInfixes.includes(x)).map((x) => fixed2[x])).map((s) => createBlock(` ${s} `));
+  const block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => fixedInfixes.includes(x)).map((x) => fixed[x])).map((s) => createBlock(` ${s} `));
   const block_value = loose(single.map(createBlock).or(brace_wrap(of(() => block_cluster))));
   const block_binary_macro = macro_head.assume((x) => !!binaryBlock[x]).follow2(block_value, block_value).map((xs) => binaryBlock[xs[0][0]](xs[0][1], xs[1]));
   const block_elem = loose(block_infix).or(block_value).or(sup_or_sub.map(createBlock)).or(fixed_macro.map(createBlock)).or(unary_macro.map(createBlock)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => emptyBlock));
