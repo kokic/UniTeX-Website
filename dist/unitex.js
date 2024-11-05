@@ -1210,7 +1210,8 @@ var createTranslator = ({
   displayBlock,
   subscriptHandler,
   supscriptHandler,
-  typefaceHandler
+  typefaceHandler,
+  inlineMathHandler = (s) => s
 }) => {
   const single = digit.or(letter).or(valuesymbol).or(of(() => fixed_macro));
   const value = loose(single.or(brace_wrap(of(() => text))));
@@ -1234,14 +1235,14 @@ var createTranslator = ({
   const comment = character("%").skip(token((x) => x != "\n").asterisk()).skip(character("\n")).map(() => "");
   const typeface2 = macro_head.assume((x) => unaryTypefaceNames.includes(x)).follow(value).map(([name, arg1]) => unary[name](arg1));
   const inline_elem = literals.or(sup_or_sub).or(environ).or(unary_macro).or(binary_macro).or(value);
-  const italic_render = (s) => typefaceHandler("mathit", s);
+  const italic_render = (s) => typefaceHandler(s, "mathit");
   const inline_cluster = typeface2.or(inline_elem.map(italic_render)).plus();
   const dollar = character("$");
-  const inline_math = dollar.move(inline_cluster).skip(dollar);
+  const inline_math = dollar.move(inline_cluster).skip(dollar).map(inlineMathHandler);
   const block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => fixedInfixes.includes(x)).map((x) => fixed[x])).map((s) => createBlock(` ${s} `));
   const block_value = loose(single.map(createBlock).or(brace_wrap(of(() => block_cluster))));
   const block_binary_macro = macro_head.assume((x) => !!binaryBlock[x]).follow2(block_value, block_value).map((xs) => binaryBlock[xs[0][0]](xs[0][1], xs[1]));
-  const block_elem = loose(block_infix).or(block_value).or(sup_or_sub.map(createBlock)).or(fixed_macro.map(createBlock)).or(unary_macro.map(createBlock)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => emptyBlock));
+  const block_elem = loose(block_infix.or(block_value).or(sup_or_sub.map(createBlock)).or(fixed_macro.map(createBlock)).or(unary_macro.map(createBlock)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => emptyBlock)));
   const block_cluster = block_elem.some().map((xs) => xs.reduce(concatBlock));
   const double_dollar = string("$$");
   const block_math = double_dollar.move(block_cluster.map(displayBlock)).skip(double_dollar);
