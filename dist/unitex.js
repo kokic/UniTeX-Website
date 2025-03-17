@@ -767,7 +767,9 @@ var texLikeExtensions = {
   KaTeX: "KᴬTᴇX",
   UniTeX: "UⁿᵢTᴇX",
   Agda: "\uD835\uDC34gda",
-  Lean: "L∃∀N"
+  Lean: "L∃∀N",
+  BibTeX: "BIBTᴇX",
+  bTeX: "\uD83C\uDF4CTᴇX"
 };
 var combinatorialExtensions = {
   sumtop: "⎲",
