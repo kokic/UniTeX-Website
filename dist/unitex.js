@@ -9,6 +9,44 @@ var Proper;
 })(Proper ||= {});
 var proper_default = Proper;
 
+// src/parsec/string-iterator.ts
+class StringIterator {
+  source;
+  index;
+  constructor(source, index) {
+    this.source = source;
+    this.index = index;
+  }
+  extract(pos) {
+    const end = typeof pos == "number" ? pos : pos.index;
+    return this.source.substring(this.index, end);
+  }
+  hasNext() {
+    return this.index < this.source.length;
+  }
+  curr() {
+    return this.source.charAt(this.index);
+  }
+  next() {
+    return new StringIterator(this.source, this.index + 1);
+  }
+  forward(length) {
+    return new StringIterator(this.source, this.index + length);
+  }
+}
+
+// src/parsec/declare-global.ts
+Number.prototype.boundedIn = function(a, b) {
+  return a <= this && this <= b;
+};
+String.prototype.boundedIn = function(a, b) {
+  const [code, start, end] = [this, a, b].map((s) => s.codePointAt(0));
+  return code.boundedIn(start, end);
+};
+String.prototype.toIterator = function() {
+  return new StringIterator(this, 0);
+};
+
 // src/impl/unicode/unicode-table.ts
 var Unicode = {
   typeface: {},
@@ -752,46 +790,6 @@ var stableFixed = {
   because: "∵",
   suchthat: "∴"
 };
-var theoremEnvExtensions = {
-  proposition: unicode_table_default.render_if_exists("Proposition", "textbf"),
-  lemma: unicode_table_default.render_if_exists("Lemma", "textbf"),
-  theorem: unicode_table_default.render_if_exists("Theorem", "textbf"),
-  corollary: unicode_table_default.render_if_exists("Corollary", "textbf"),
-  definition: unicode_table_default.render_if_exists("Definition", "textbf"),
-  remark: unicode_table_default.render_if_exists("Remark", "textbf"),
-  hypothesis: unicode_table_default.render_if_exists("Hypothesis", "textbf"),
-  conjecture: unicode_table_default.render_if_exists("Conjecture", "textbf"),
-  axiom: unicode_table_default.render_if_exists("Axiom", "textbf"),
-  example: unicode_table_default.render_if_exists("Example", "textbf"),
-  proof: unicode_table_default.render_if_exists("proof", "textit")
-};
-var texLikeExtensions = {
-  KaTeX: "KᴬTᴇX",
-  UniTeX: "UⁿᵢTᴇX",
-  Agda: "\uD835\uDC34gda",
-  Lean: "L∃∀N",
-  BibTeX: "BIBTᴇX",
-  bTeX: "\uD83C\uDF4CTᴇX"
-};
-var combinatorialExtensions = {
-  sumtop: "⎲",
-  sumbottom: "⎳",
-  lbraceuend: "⎧",
-  lbracemid: "⎨",
-  lbracelend: "⎩"
-};
-var createFixed = (options) => {
-  const fixed = stableFixed;
-  options.useTheoremEnvExtensions && Object.assign(fixed, theoremEnvExtensions);
-  options.useTexLikeExtensions && Object.assign(fixed, texLikeExtensions);
-  options.useCombinatorialExtensions && Object.assign(fixed, combinatorialExtensions);
-  return fixed;
-};
-var Fixed = createFixed({
-  useTheoremEnvExtensions: true,
-  useTexLikeExtensions: true,
-  useCombinatorialExtensions: true
-});
 var FixedInfixes = [
   "plus",
   "minus",
@@ -902,7 +900,7 @@ var operatorNames = [
   "tg",
   "th"
 ];
-operatorNames.forEach((x) => Fixed[x] = x);
+operatorNames.forEach((x) => stableFixed[x] = x);
 var greeks = [
   "Alpha",
   "Beta",
@@ -953,12 +951,13 @@ var greeks = [
   "psi",
   "omega"
 ];
-greeks.forEach((x, i) => Fixed[x] = unicode_table_default.greeks[i]);
-Fixed.epsilon = "ϵ";
-unicode_table_default.supscripts[Fixed.times] = unicode_table_default.supscripts.x;
-unicode_table_default.subscripts[Fixed.in] = Fixed.smallin;
-unicode_table_default.subscripts[Fixed.ni] = Fixed.smallni;
-var fixed_default = Fixed;
+greeks.forEach((x, i) => stableFixed[x] = unicode_table_default.greeks[i]);
+stableFixed.epsilon = "ϵ";
+var stableValue = (key) => stableFixed[key];
+unicode_table_default.supscripts[stableValue("times")] = unicode_table_default.supscripts.x;
+unicode_table_default.subscripts[stableValue("in")] = stableValue("smallin");
+unicode_table_default.subscripts[stableValue("ni")] = stableValue("smallni");
+var fixed_default = stableFixed;
 
 // src/impl/unicode/unary.ts
 var unchecked_accents = (unicode) => (x) => `${x}${unicode}`;
@@ -969,20 +968,22 @@ var Unary = {
   sqrt: (x) => "√" + proper_default.paren(x),
   cbrt: (x) => "∛" + proper_default.paren(x),
   furt: (x) => "∜" + proper_default.paren(x),
-  grave: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "̀" : "-grave"),
+  grave: unchecked_accents("̀"),
   "`": unchecked_accents("̀"),
-  acute: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "́" : "-acute"),
+  acute: unchecked_accents("́"),
   "'": unchecked_accents("́"),
-  hat: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "̂" : "-hat"),
+  hat: unchecked_accents("̂"),
   "^": unchecked_accents("̂"),
-  tilde: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "̃" : "-tilde"),
+  tilde: unchecked_accents("̃"),
   "~": unchecked_accents("̃"),
-  bar: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "̄" : "-bar"),
+  bar: unchecked_accents("̄"),
   "=": unchecked_accents("̄"),
   overline: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "̅" : "-underline"),
   breve: (x) => x + (unicode_table_default.isLetterOrGreek(x) ? "̆" : "-breve"),
   u: unchecked_accents("̆"),
+  dot: unchecked_accents("̇"),
   ".": unchecked_accents("̇"),
+  ddot: unchecked_accents("̈"),
   '"': unchecked_accents("̈"),
   r: unchecked_accents("̊"),
   H: unchecked_accents("̋"),
@@ -1011,102 +1012,16 @@ for (const key of ["mkern", "mskip", "hskip", "hspace"]) {
 unicode_table_default.typefaceNames.forEach((x) => Unary[x] = (s) => unicode_table_default.render_if_exists(s, x));
 var UnaryTypefaceNames = ["text", "mathrm", ...unicode_table_default.typefaceNames];
 
-// src/impl/unicode/block.ts
-var desired_length_string = function(s, n) {
-  const residue = n - s.length;
-  if (residue === 0)
-    return s;
-  if (residue > 0) {
-    const left = Math.floor(residue / 2);
-    const right = residue - left;
-    return " ".repeat(left) + s + " ".repeat(right);
+// src/macro-types.ts
+var getFixedValue = (fixed, key) => {
+  const data = fixed[key];
+  if (typeof data === "string") {
+    return data;
+  } else if (data && typeof data === "object" && "category" in data) {
+    return data.value;
   }
-  return s.substring(0, n);
+  throw new Error(`Fixed macro "${key}" not found or invalid.`);
 };
-
-class Block {
-  width;
-  height;
-  data;
-  display;
-  baseline;
-  constructor(data, baseline = 0) {
-    this.width = Math.max(...data.map((x) => x.length));
-    this.height = data.length;
-    this.data = data.map((x) => desired_length_string(x, this.width));
-    this.display = this.data.join(`
-`);
-    this.baseline = baseline;
-  }
-  adjustHeight(n, offset) {
-    const residue = n - this.height;
-    if (residue == 0) {
-      return this;
-    }
-    const topLine = Array(offset).fill("");
-    const bottomLine = Array(residue - offset).fill("");
-    return new Block(topLine.concat(this.data).concat(bottomLine));
-  }
-  append(block) {
-    const isHigher = this.height > block.height;
-    const isGreat = this.baseline > block.baseline;
-    const [offset, baseline] = isGreat ? [this.baseline - block.baseline, this.baseline] : [block.baseline - this.baseline, block.baseline];
-    const [left, right] = isHigher ? [this.data, block.adjustHeight(this.height, offset).data] : [this.adjustHeight(block.height, offset).data, block.data];
-    return new Block(left.map((v, i) => v + right[i]), baseline);
-  }
-  add = (block) => this.append(Block.plus).append(block);
-  over(block) {
-    const width = Math.max(this.width, block.width) + 2;
-    const fracline = "-".repeat(width);
-    const data = [...this.data, fracline, ...block.data];
-    return new Block(data.map((x) => desired_length_string(x, width)), this.height);
-  }
-  static of = (s) => new Block([s]);
-  static empty = Block.of("");
-  static plus = Block.of(" + ");
-  static fromStrings(p, q) {
-    const width = Math.max(p.length, q.length) + 2;
-    const desired_p = desired_length_string(p, width);
-    const desired_q = desired_length_string(q, width);
-    const data = [desired_p, "-".repeat(width), desired_q];
-    return new Block(data, 1);
-  }
-  static frac(a, b) {
-    return a instanceof Block && b instanceof Block ? a.over(b) : typeof a == "string" && typeof b == "string" ? Block.fromStrings(a, b) : typeof a == "string" ? Block.frac(Block.of(a), b) : Block.frac(a, Block.of(b));
-  }
-}
-var block_default = Block;
-
-// src/impl/unicode/binary.ts
-var oversetEquationMap = {
-  "?=": fixed_default.qeq,
-  "m=": fixed_default.meq,
-  "def=": fixed_default.defeq,
-  [fixed_default["star"] + "="]: fixed_default["stareq"],
-  [fixed_default["Delta"] + "="]: fixed_default["deltaeq"]
-};
-var Binary = {
-  frac: (x, y) => `${proper_default.paren(x)}/${proper_default.paren(y)}`,
-  overset: (x, y) => oversetEquationMap[`${x}${y}`] || `\\overset{${x}}{${y}}`,
-  binom: (n, k) => `(${n} ${k})`,
-  alias: (a, x) => (fixed_default[a] = x, "")
-};
-var BinaryBlock = {
-  frac: block_default.frac,
-  overset: (x, y) => block_default.of(Binary.overset(x.display, y.display))
-};
-var BinaryInfix = {
-  choose: (n, k) => Binary.binom(n, k)
-};
-Binary["cfrac"] = Binary.frac;
-Binary["dfrac"] = Binary.frac;
-Binary["tfrac"] = Binary.frac;
-Binary["dbinom"] = Binary.binom;
-Binary["tbinom"] = Binary.binom;
-BinaryBlock["cfrac"] = BinaryBlock.frac;
-BinaryBlock["dfrac"] = BinaryBlock.frac;
-BinaryBlock["tfrac"] = BinaryBlock.frac;
-var binary_default = Binary;
 
 // src/parsec/parse.ts
 var success = (pos, res) => ({ type: "success", pos, res });
@@ -1232,44 +1147,6 @@ var digits = digit.plus();
 var letter = token((c) => c.boundedIn("a", "z") || c.boundedIn("A", "Z"));
 var letters = letter.plus();
 
-// src/parsec/string-iterator.ts
-class StringIterator {
-  source;
-  index;
-  constructor(source, index) {
-    this.source = source;
-    this.index = index;
-  }
-  extract(pos) {
-    const end = typeof pos == "number" ? pos : pos.index;
-    return this.source.substring(this.index, end);
-  }
-  hasNext() {
-    return this.index < this.source.length;
-  }
-  curr() {
-    return this.source.charAt(this.index);
-  }
-  next() {
-    return new StringIterator(this.source, this.index + 1);
-  }
-  forward(length) {
-    return new StringIterator(this.source, this.index + length);
-  }
-}
-
-// src/parsec/declare-global.ts
-Number.prototype.boundedIn = function(a, b) {
-  return a <= this && this <= b;
-};
-String.prototype.boundedIn = function(a, b) {
-  const [code, start, end] = [this, a, b].map((s) => s.codePointAt(0));
-  return code.boundedIn(start, end);
-};
-String.prototype.toIterator = function() {
-  return new StringIterator(this, 0);
-};
-
 // src/cli.ts
 var backslash = character("\\");
 var lbrace = character("{");
@@ -1308,7 +1185,7 @@ var createTranslator = ({
   const symbol_macros = includes(...`|,>:;!()[]{}_%\\\`^~=."'`);
   const macro_name = letters.or(symbol_macros);
   const macro_head = backslash.move(macro_name);
-  const fixed_macro = macro_head.assume((x) => (x in fixed)).map((s) => fixed[s]);
+  const fixed_macro = macro_head.assume((x) => (x in fixed)).map((s) => getFixedValue(fixed, s));
   const unary_ordinary_macro = macro_head.assume((x) => (x in unary)).follow(value).map(([name, arg1]) => unary[name](arg1));
   const unary_optional_macro = macro_head.assume((x) => !!unaryOptional[x]).follow2(optional, value).map(([[name, opt1], arg1]) => unaryOptional[name](opt1, arg1));
   const unary_macro = unary_optional_macro.or(unary_ordinary_macro);
@@ -1330,7 +1207,7 @@ var createTranslator = ({
   const inline_cluster = typeface2.or(inline_elem.map(italic_render)).plus();
   const dollar = character("$");
   const inline_math = dollar.move(inline_cluster).skip(dollar).map(inlineMathHandler);
-  const block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => fixedInfixes.includes(x)).map((x) => fixed[x])).map((s) => createBlock(` ${s} `));
+  const block_infix = token((x) => "+-*/<>~".includes(x)).or(macro_head.assume((x) => fixedInfixes.includes(x)).map((x) => getFixedValue(fixed, x))).map((s) => createBlock(` ${s} `));
   const block_value = loose(single.map(createBlock).or(brace_wrap(of(() => block_cluster))));
   const block_binary_macro = macro_head.assume((x) => !!binaryBlock[x]).follow2(block_value, block_value).map((xs) => binaryBlock[xs[0][0]](xs[0][1], xs[1]));
   const block_elem = loose(block_infix.or(block_value).or(sup_or_sub.map(createBlock)).or(fixed_macro.map(createBlock)).or(unary_macro.map(createBlock)).or(block_binary_macro).or(token((x) => !solid(x)).some().map((_) => emptyBlock)));
@@ -1348,8 +1225,97 @@ var createTranslator = ({
   return translate;
 };
 
+// src/impl/unicode/block.ts
+var desired_length_string = function(s, n) {
+  const residue = n - s.length;
+  if (residue === 0)
+    return s;
+  if (residue > 0) {
+    const left = Math.floor(residue / 2);
+    const right = residue - left;
+    return " ".repeat(left) + s + " ".repeat(right);
+  }
+  return s.substring(0, n);
+};
+
+class Block {
+  width;
+  height;
+  data;
+  display;
+  baseline;
+  constructor(data, baseline = 0) {
+    this.width = Math.max(...data.map((x) => x.length));
+    this.height = data.length;
+    this.data = data.map((x) => desired_length_string(x, this.width));
+    this.display = this.data.join(`
+`);
+    this.baseline = baseline;
+  }
+  adjustHeight(n, offset) {
+    const residue = n - this.height;
+    if (residue == 0) {
+      return this;
+    }
+    const topLine = Array(offset).fill("");
+    const bottomLine = Array(residue - offset).fill("");
+    return new Block(topLine.concat(this.data).concat(bottomLine));
+  }
+  append(block) {
+    const isHigher = this.height > block.height;
+    const isGreat = this.baseline > block.baseline;
+    const [offset, baseline] = isGreat ? [this.baseline - block.baseline, this.baseline] : [block.baseline - this.baseline, block.baseline];
+    const [left, right] = isHigher ? [this.data, block.adjustHeight(this.height, offset).data] : [this.adjustHeight(block.height, offset).data, block.data];
+    return new Block(left.map((v, i) => v + right[i]), baseline);
+  }
+  add = (block) => this.append(Block.plus).append(block);
+  over(block) {
+    const width = Math.max(this.width, block.width) + 2;
+    const fracline = "-".repeat(width);
+    const data = [...this.data, fracline, ...block.data];
+    return new Block(data.map((x) => desired_length_string(x, width)), this.height);
+  }
+  static of = (s) => new Block([s]);
+  static empty = Block.of("");
+  static plus = Block.of(" + ");
+  static fromStrings(p, q) {
+    const width = Math.max(p.length, q.length) + 2;
+    const desired_p = desired_length_string(p, width);
+    const desired_q = desired_length_string(q, width);
+    const data = [desired_p, "-".repeat(width), desired_q];
+    return new Block(data, 1);
+  }
+  static frac(a, b) {
+    return a instanceof Block && b instanceof Block ? a.over(b) : typeof a == "string" && typeof b == "string" ? Block.fromStrings(a, b) : typeof a == "string" ? Block.frac(Block.of(a), b) : Block.frac(a, Block.of(b));
+  }
+}
+var block_default = Block;
+
+// src/impl/unicode/binary.ts
+var oversetLookup = {};
+var Binary2 = {
+  frac: (x, y) => `${proper_default.paren(x)}/${proper_default.paren(y)}`,
+  overset: (x, y) => oversetLookup[`${x}${y}`] || `\\overset{${x}}{${y}}`,
+  binom: (n, k) => `(${n} ${k})`
+};
+Binary2["cfrac"] = Binary2.frac;
+Binary2["dfrac"] = Binary2.frac;
+Binary2["tfrac"] = Binary2.frac;
+Binary2["dbinom"] = Binary2.binom;
+Binary2["tbinom"] = Binary2.binom;
+var BinaryBlock2 = {
+  frac: block_default.frac,
+  overset: (x, y) => block_default.of(Binary2.overset(x.display, y.display))
+};
+var BinaryInfix = {
+  choose: (n, k) => Binary2.binom(n, k)
+};
+BinaryBlock2["cfrac"] = BinaryBlock2.frac;
+BinaryBlock2["dfrac"] = BinaryBlock2.frac;
+BinaryBlock2["tfrac"] = BinaryBlock2.frac;
+
 // src/impl/unicode/environment.ts
-var Environment = {
+var Environment2 = {
   matrix: (s) => separateMatrix(s, " ", " ", "; "),
   smallmatrix: (s) => separateMatrix(s, " ", " ", "; "),
   bmatrix: (s) => regularMatrix(s, "[", "]"),
@@ -1357,51 +1323,116 @@ var Environment = {
   vmatrix: (s) => separateMatrix(s, "|", "|", "; "),
   Bmatrix: (s) => regularMatrix(s, "{", "}"),
   Vmatrix: (s) => separateMatrix(s, "||", "||", "; "),
-  proposition: (s) => theorem_style("proposition", s),
-  lemma: (s) => theorem_style("lemma", s),
-  theorem: (s) => theorem_style("theorem", s),
-  corollary: (s) => theorem_style("corollary", s),
-  definition: (s) => theorem_style("definition", s),
-  remark: (s) => theorem_style("remark", s),
-  hypothesis: (s) => theorem_style("hypothesis", s),
-  conjecture: (s) => theorem_style("conjecture", s),
-  axiom: (s) => theorem_style("axiom", s),
-  example: (s) => theorem_style("example", s),
-  proof: (s) => theorem_style("proof", s)
+  proposition: (s) => theoremStyle("proposition", s),
+  lemma: (s) => theoremStyle("lemma", s),
+  theorem: (s) => theoremStyle("theorem", s),
+  corollary: (s) => theoremStyle("corollary", s),
+  definition: (s) => theoremStyle("definition", s),
+  remark: (s) => theoremStyle("remark", s),
+  hypothesis: (s) => theoremStyle("hypothesis", s),
+  conjecture: (s) => theoremStyle("conjecture", s),
+  axiom: (s) => theoremStyle("axiom", s),
+  example: (s) => theoremStyle("example", s),
+  proof: (s) => theoremStyle("proof", s)
 };
 var doubleBackslash = "\\\\";
 var matrixM = (s) => s.replace(/\s/g, "").replace(/&/g, " ");
-var regularMatrix = function(matrix, leftSymbol, rightSymbol, leftGlobalSymbol = leftSymbol, rightGlobalSymbol = rightSymbol) {
+var regularMatrix = function(matrix, leftMark, rightMark, leftOuterMark = leftMark, rightOuterMark = rightMark) {
   const xs = matrix.split(doubleBackslash);
-  const s = "".concat(...xs.map((s2) => leftSymbol + matrixM(s2) + rightSymbol));
-  return xs.length > 1 ? leftGlobalSymbol + s + rightGlobalSymbol : s;
+  const s = "".concat(...xs.map((s2) => leftMark + matrixM(s2) + rightMark));
+  return xs.length > 1 ? leftOuterMark + s + rightOuterMark : s;
 };
-var separateMatrix = function(matrix, leftGlobalSymbol, rightGlobalSymbol, separator) {
+var separateMatrix = function(matrix, leftOuterMark, rightOuterMark, separator) {
   const xs = matrix.split(doubleBackslash);
-  return leftGlobalSymbol + xs.map(matrixM).join(separator) + rightGlobalSymbol;
+  return leftOuterMark + xs.map(matrixM).join(separator) + rightOuterMark;
 };
-var polymerize_tex = function(s) {
+var polymerize = function(s) {
   let result = s.trim().replace(/ *\r\n *| *\n *| (?= )/g, "").replace(/ *(,|\.) */g, "$1 ");
   return result;
 };
 var regexpDoubleLine = /\r\n\r\n|\n\n/;
-var theorem_style = function(type, content) {
+var theoremStyle = function(type, content) {
   let title = fixed_default[type] + ". ";
-  return title + content.split(regexpDoubleLine).map(polymerize_tex).join(`
+  return title + content.split(regexpDoubleLine).map(polymerize).join(`
 `);
 };
-var environment_default = Environment;
+var environment_default = Environment2;
+
+// src/impl/x/fixed-banner.ts
+var FixedBanner = {
+  KaTeX: { category: "KaTeX", value: "KᴬTᴇX" },
+  UniTeX: { category: "UniTeX", value: "UⁿᵢTᴇX" },
+  Agda: { category: "UniTeX", value: "\uD835\uDC34gda" },
+  Lean: { category: "UniTeX", value: "L∃∀N" },
+  BibTeX: { category: "UniTeX", value: "BIBTᴇX" },
+  bTeX: { category: "UniTeX", value: "\uD83C\uDF4CTᴇX" }
+};
+var fixed_banner_default = FixedBanner;
+
+// src/impl/x/fixed-theorem.ts
+var FixedTheorem = {
+  proposition: { category: "UniTeX", value: unicode_table_default.render_if_exists("Proposition", "textbf") },
+  lemma: { category: "UniTeX", value: unicode_table_default.render_if_exists("Lemma", "textbf") },
+  theorem: { category: "UniTeX", value: unicode_table_default.render_if_exists("Theorem", "textbf") },
+  corollary: { category: "UniTeX", value: unicode_table_default.render_if_exists("Corollary", "textbf") },
+  definition: { category: "UniTeX", value: unicode_table_default.render_if_exists("Definition", "textbf") },
+  remark: { category: "UniTeX", value: unicode_table_default.render_if_exists("Remark", "textbf") },
+  hypothesis: { category: "UniTeX", value: unicode_table_default.render_if_exists("Hypothesis", "textbf") },
+  conjecture: { category: "UniTeX", value: unicode_table_default.render_if_exists("Conjecture", "textbf") },
+  axiom: { category: "UniTeX", value: unicode_table_default.render_if_exists("Axiom", "textbf") },
+  example: { category: "UniTeX", value: unicode_table_default.render_if_exists("Example", "textbf") },
+  proof: { category: "UniTeX", value: unicode_table_default.render_if_exists("proof", "textit") }
+};
+var fixed_theorem_default = FixedTheorem;
+
+// src/impl/x/unicode-math.ts
+var FixedUnicodeMath = {
+  ncong: { category: "unicode-math", value: "≇" },
+  approx: { category: "unicode-math", value: "≈" },
+  napprox: { category: "unicode-math", value: "≉" },
+  approxeq: { category: "unicode-math", value: "≊" },
+  approxident: { category: "unicode-math", value: "≋" },
+  backcong: { category: "unicode-math", value: "≌" },
+  asymp: { category: "unicode-math", value: "≍" },
+  Bumpeq: { category: "unicode-math", value: "≎" },
+  bumpeq: { category: "unicode-math", value: "≏" },
+  doteq: { category: "unicode-math", value: "≐" },
+  Doteq: { category: "unicode-math", value: "≑" },
+  fallingdotseq: { category: "unicode-math", value: "≒" },
+  risingdotseq: { category: "unicode-math", value: "≓" },
+  coloneq: { category: "unicode-math", value: "≔" },
+  eqcolon: { category: "unicode-math", value: "≕" },
+  eqcirc: { category: "unicode-math", value: "≖" },
+  circeq: { category: "unicode-math", value: "≗" },
+  arceq: { category: "unicode-math", value: "≘" },
+  wedgeq: { category: "unicode-math", value: "≙" },
+  veeeq: { category: "unicode-math", value: "≚" },
+  stareq: { category: "unicode-math", value: "≛" },
+  triangleq: { category: "unicode-math", value: "≜" },
+  eqdef: { category: "unicode-math", value: "≝" },
+  measeq: { category: "unicode-math", value: "≞" },
+  questeq: { category: "unicode-math", value: "≟" }
+};
+var UnicodeMathOversetLookup = {
+  "?=": FixedUnicodeMath.questeq.value,
+  "m=": FixedUnicodeMath.measeq.value,
+  "def=": FixedUnicodeMath.eqdef.value,
+  [fixed_default.star + "="]: FixedUnicodeMath.stareq.value,
+  [fixed_default.Delta + "="]: FixedUnicodeMath.triangleq.value
+};
 
 // src/impl/unicode.ts
+Object.assign(fixed_default, fixed_banner_default, fixed_theorem_default, FixedUnicodeMath);
+Object.assign(oversetLookup, UnicodeMathOversetLookup);
 var translate = createTranslator({
   fixed: fixed_default,
   fixedInfixes: FixedInfixes,
   unary: unary_default,
   unaryOptional: UnaryOptional,
   unaryTypefaceNames: UnaryTypefaceNames,
-  binary: binary_default,
+  binary: Binary2,
   binaryInfix: BinaryInfix,
-  binaryBlock: BinaryBlock,
+  binaryBlock: BinaryBlock2,
   environment: environment_default,
   emptyBlock: block_default.empty,
   createBlock: block_default.of,
@@ -1417,7 +1448,7 @@ var UniTeX = {
   parse: translate,
   fixed: fixed_default,
   unary: unary_default,
-  binary: binary_default
+  binary: Binary2
 };
 export {
   UniTeX
