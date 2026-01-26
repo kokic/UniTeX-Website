@@ -283,8 +283,8 @@ var stableFixed = {
   urcorner: "┐",
   llcorner: "└",
   lrcorner: "┘",
-  llbracket: "[[",
-  rlbracket: "]]",
+  llbracket: "⟦",
+  rrbracket: "⟧",
   lBrace: "{[",
   rBrace: "]}",
   bigotimes: "⨂",
@@ -1365,7 +1365,8 @@ var FixedBanner = {
   Agda: { category: "UniTeX", value: "\uD835\uDC34gda" },
   Lean: { category: "UniTeX", value: "L∃∀N" },
   BibTeX: { category: "UniTeX", value: "BIBTᴇX" },
-  bTeX: { category: "UniTeX", value: "\uD83C\uDF4CTᴇX" }
+  bTeX: { category: "UniTeX", value: "\uD83C\uDF4CTᴇX" },
+  typst: { category: "UniTeX", value: "\uD835\uDC61\uD835\uDC66\uD835\uDC5D\uD835\uDC60\uD835\uDC61" }
 };
 var fixed_banner_default = FixedBanner;
 
